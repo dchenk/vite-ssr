@@ -13,7 +13,6 @@ module.exports = defineConfig({
         reactApolloRenderer: false,
       },
     }),
-    ,
     react(),
   ],
 })

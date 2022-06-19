@@ -8,10 +8,10 @@
     "serve:node": "node ../node-server/index react-apollo"
   },
   "dependencies": {
-    "@apollo/client": "^3.3.18",
+    "@apollo/client": "^3.6.8",
     "graphql": "^15.5.0",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
     "react-helmet-async": "^1.0.9",
     "react-router-dom": "^6.2.2",
     "styled-components": "^5.3.0"

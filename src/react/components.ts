@@ -1,16 +1,19 @@
 import {
-  useState,
-  useEffect,
+  createContext as reactCreateContext,
   createElement,
   Fragment,
   FunctionComponent,
   ReactElement,
-  createContext as reactCreateContext,
+  ReactNode,
   useContext as reactUseContext,
+  useEffect,
+  useState,
 } from 'react'
 import type { Context } from './types'
 
-export const ClientOnly: FunctionComponent = ({ children }) => {
+export const ClientOnly: FunctionComponent<{
+  children: ReactNode;
+}> = ({ children }) => {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true))
 

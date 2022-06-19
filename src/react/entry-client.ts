@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react'
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client';
 import createClientContext from '../core/entry-client.js'
 import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
@@ -8,7 +8,7 @@ import { createRouter } from './utils'
 import type { ClientHandler, Context } from './types'
 
 import { provideContext } from './components.js'
-export { ClientOnly, useContext } from './components.js'
+export { useContext } from './components.js'
 
 export const viteSSR: ClientHandler = async function (
   App,
@@ -76,7 +76,7 @@ export const viteSSR: ClientHandler = async function (
     styles && styles.cleanup && styles.cleanup()
 
     // @ts-ignore
-    __DEV__ ? ReactDOM.render(app, el) : ReactDOM.hydrate(app, el)
+    __DEV__ ? ReactDOM.createRoot(el).render(app) : ReactDOM.hydrateRoot(el, app)
   }
 }
 
