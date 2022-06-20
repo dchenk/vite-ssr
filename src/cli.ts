@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import { performance } from 'perf_hooks'
+import build from './build'
+import { startServer } from './dev'
 
 // @ts-ignore
 if (!globalThis.__ssr_start_time) {
-  const { performance } = require('perf_hooks')
   // @ts-ignore
   globalThis.__ssr_start_time = performance.now()
 }
@@ -24,7 +26,6 @@ const [command] = args
 
 if (command === 'build') {
   // @ts-ignore
-  const build = require('./build')
 
   ;(async () => {
     const { mode, ssr, watch } = options
@@ -43,7 +44,7 @@ if (command === 'build') {
   command === undefined ||
   command.startsWith('-')
 ) {
-  require('./dev').startServer(options)
+  startServer(options)
 } else {
   console.log(`Command "${command}" not supported`)
 }
