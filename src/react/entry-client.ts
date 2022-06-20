@@ -50,15 +50,15 @@ export const viteSSR: ClientHandler = async function (
   }
 
   let app: ReactElement = React.createElement(
-    HelmetProvider,
-    {},
+    React.Suspense,
+    { fallback: suspenseFallback || '' },
     React.createElement(
-      // @ts-ignore
-      BrowserRouter,
-      { basename: routeBase },
+      HelmetProvider,
+      {},
       React.createElement(
-        React.Suspense,
-        { fallback: suspenseFallback || '' },
+        // @ts-ignore
+        BrowserRouter,
+        { basename: routeBase },
         provideContext(React.createElement(App, context), context)
       )
     )

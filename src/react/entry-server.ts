@@ -59,13 +59,17 @@ const viteSSR: SsrHandler = function (
     const helmetContext: Record<string, Record<string, string>> = {}
 
     let app: ReactElement = React.createElement(
-      HelmetProvider,
-      { context: helmetContext },
+      React.Suspense,
+      { fallback: '' },
       React.createElement(
-        // @ts-ignore
-        StaticRouter,
-        { basename: routeBase, location: fullPath },
-        provideContext(React.createElement(App, context), context)
+        HelmetProvider,
+        { context: helmetContext },
+        React.createElement(
+          // @ts-ignore
+          StaticRouter,
+          { basename: routeBase, location: fullPath },
+          provideContext(React.createElement(App, context), context)
+        )
       )
     )
 
