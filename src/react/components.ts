@@ -12,7 +12,7 @@ import {
 import type { Context } from './types'
 
 export const ClientOnly: FunctionComponent<{
-  children: ReactNode;
+  children: ReactNode
 }> = ({ children }) => {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true))

@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react'
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom/client'
 import createClientContext from '../core/entry-client.js'
 import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
@@ -76,7 +76,11 @@ export const viteSSR: ClientHandler = async function (
     styles && styles.cleanup && styles.cleanup()
 
     // @ts-ignore
-    __DEV__ ? ReactDOM.createRoot(el).render(app) : ReactDOM.hydrateRoot(el, app)
+    __DEV__
+      ? // @ts-ignore
+        ReactDOM.createRoot(el).render(app)
+      : // @ts-ignore
+        ReactDOM.hydrateRoot(el, app)
   }
 }
 

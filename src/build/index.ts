@@ -16,9 +16,17 @@ import type {
   OutputOptions,
 } from 'rollup'
 
-export = async (inlineBuildOptions: BuildOptions = {}, _viteConfig?: ResolvedConfig) =>
+const cleanPathStart = (path: string): string =>
+  path.startsWith('/') || path.startsWith('.')
+    ? cleanPathStart(path.substring(1))
+    : path
+
+export = async (
+  inlineBuildOptions: BuildOptions = {},
+  _viteConfig?: ResolvedConfig
+) =>
   new Promise(async (resolve) => {
-    const viteConfig = _viteConfig || await resolveViteConfig()
+    const viteConfig = _viteConfig || (await resolveViteConfig())
 
     const distDir =
       viteConfig.build?.outDir ?? path.resolve(process.cwd(), 'dist')
@@ -140,9 +148,13 @@ export = async (inlineBuildOptions: BuildOptions = {}, _viteConfig?: ResolvedCon
       ).flatMap((result) => result.output)
 
       // Get the index.html from the resulting bundle.
+      const inputFilePathClean = cleanPathStart(inputFilePath)
       indexHtmlTemplate = (
         clientOutputs.find(
-          (file) => file.type === 'asset' && file.fileName === INDEX_HTML
+          (file) =>
+            file.type === 'asset' &&
+            (file.fileName === INDEX_HTML ||
+              inputFilePathClean === file.fileName)
         ) as OutputAsset
       )?.source as string
 
