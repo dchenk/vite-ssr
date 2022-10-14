@@ -1,4 +1,5 @@
-import React, { ReactElement } from 'react'
+import { getMarkupFromTree } from '@apollo/client/react/ssr';
+import { createElement, ReactElement, ReactNode, Suspense } from 'react'
 import ssrPrepass from 'react-ssr-prepass'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router-dom/server'
@@ -7,23 +8,15 @@ import { getFullPath, withoutSuffix } from '../utils/route'
 import { createRouter } from './utils'
 import coreViteSSR from '../core/entry-server.js'
 import type { Context, SsrHandler } from './types'
-
 import { provideContext } from './components.js'
-export { ClientOnly, useContext } from './components.js'
 
-let render: (element: ReactElement) => string | Promise<string> = renderToString
+export { useContext } from './components.js'
 
-// @ts-ignore
-if (__USE_APOLLO_RENDERER__) {
-  // Apollo does not support Suspense so it needs its own
-  // renderer in order to await for async queries.
-  // @ts-ignore
-  import('@apollo/client/react/ssr')
-    .then(({ renderToStringWithData }) => {
-      render = renderToStringWithData
-    })
-    .catch(() => null)
-}
+const render = (component: ReactNode) =>
+  getMarkupFromTree({
+    tree: component,
+    renderFunction: renderToString
+  });
 
 const viteSSR: SsrHandler = function (
   App,
@@ -58,17 +51,16 @@ const viteSSR: SsrHandler = function (
     const fullPath = getFullPath(context.url, routeBase)
     const helmetContext: Record<string, Record<string, string>> = {}
 
-    let app: ReactElement = React.createElement(
-      React.Suspense,
+    let app: ReactElement = createElement(
+      Suspense,
       { fallback: '' },
-      React.createElement(
+      createElement(
         HelmetProvider,
         { context: helmetContext },
-        React.createElement(
-          // @ts-ignore
+        createElement(
           StaticRouter,
           { basename: routeBase, location: fullPath },
-          provideContext(React.createElement(App, context), context)
+          provideContext(createElement(App, context), context)
         )
       )
     )

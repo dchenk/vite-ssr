@@ -1,13 +1,6 @@
 #!/usr/bin/env node
-import { performance } from 'perf_hooks'
-import build from './build'
-import { startServer } from './dev'
-
-// @ts-ignore
-if (!globalThis.__ssr_start_time) {
-  // @ts-ignore
-  globalThis.__ssr_start_time = performance.now()
-}
+import { viteSSR } from './build'
+import { startServer } from './dev/server'
 
 const [, , ...args] = process.argv
 
@@ -25,12 +18,10 @@ for (let i = 0; i < args.length; i++) {
 const [command] = args
 
 if (command === 'build') {
-  // @ts-ignore
-
-  ;(async () => {
+  (async () => {
     const { mode, ssr, watch } = options
 
-    await build({
+    await viteSSR({
       clientOptions: { mode, build: { watch } },
       serverOptions: { mode, build: { ssr } },
     })
@@ -44,7 +35,7 @@ if (command === 'build') {
   command === undefined ||
   command.startsWith('-')
 ) {
-  startServer(options)
+  void startServer(options)
 } else {
   console.log(`Command "${command}" not supported`)
 }

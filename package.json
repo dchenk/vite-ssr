@@ -1,25 +1,23 @@
 {
-  "name": "vite-ssr",
-  "version": "0.16.0",
-  "private": true,
+  "name": "vite-ssr-react",
+  "version": "0.17.3",
   "description": "Vite utility for server side rendering",
-  "main": "./index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "dev": "npm-run-all dev:* --parallel dev:watch:* ",
     "dev:clean": "rm -rf node_modules/vite-ssr && mkdir node_modules/vite-ssr",
     "dev:copy": "cp package.json node_modules/vite-ssr/",
-    "dev:watch:cjs": "cd src && yarn tsc --watch --incremental --outDir ./node_modules/vite-ssr",
-    "dev:watch:esm": "yarn dev:watch:cjs --project tsconfig-esm.json",
     "test": "uvu -r ts-node/register test/specs",
     "test:watch": "watchlist src test -- yarn test",
-    "pretest": "run-s  \"build:compile:* --incremental --outDir ./node_modules/vite-ssr\" dev:copy",
-    "build": "npm-run-all build:* --parallel build:compile:*",
+    "pretest": "npm run build:compile --outDir ./node_modules/vite-ssr && npm run dev:copy",
+    "build": "npm-run-all build:*",
     "build:clean": "rm -rf dist && mkdir dist",
-    "build:copy": "cp README.md LICENSE dist/ && sed -e '/\"private\"/d' package.json > dist/package.json",
-    "build:compile:cjs": "cd src && yarn tsc",
-    "build:compile:esm": "cd src && yarn tsc --project tsconfig-esm.json",
-    "format": "prettier --write ."
+    "build:copy": "cp README.md LICENSE dist/",
+    "build:compile": "cd src && tsc",
+    "typecheck": "tsc --noEmit"
   },
+  "type": "module",
+  "files": ["dist"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/frandiox/vite-ssr.git"
@@ -27,67 +25,30 @@
   "keywords": [
     "vite",
     "ssr",
-    "vue",
     "react"
   ],
   "author": "Fran Dios",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/frandiox/vite-ssr/issues"
+    "url": "https://github.com/dchenk/vite-ssr/issues"
   },
-  "homepage": "https://github.com/frandiox/vite-ssr#readme",
-  "bin": "./cli.js",
-  "types": "./index.d.ts",
+  "homepage": "https://github.com/dchenk/vite-ssr#readme",
+  "bin": "./dist/cli.js",
+  "types": "./dist/index.d.ts",
   "workspaces": [
-    "examples/vue",
-    "examples/react",
     "examples/react-apollo",
     "test/fixtures/*"
   ],
   "peerDependencies": {
-    "@vitejs/plugin-react": "^1.1.3",
-    "@vitejs/plugin-vue": "^2.0.1",
-    "@vueuse/head": "0.x",
+    "@vitejs/plugin-react": "^2.1.0",
     "react": "^18",
     "react-dom": "^18",
-    "react-helmet-async": "^1.0.0",
-    "react-router-dom": "^6",
-    "vite": "^2.9.12",
-    "vue": "^3.2.26",
-    "vue-router": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@vitejs/plugin-react": {
-      "optional": true
-    },
-    "@vitejs/plugin-vue": {
-      "optional": true
-    },
-    "@vueuse/head": {
-      "optional": true
-    },
-    "vue": {
-      "optional": true
-    },
-    "vue-router": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    },
-    "react-helmet-async": {
-      "optional": true
-    },
-    "react-router-dom": {
-      "optional": true
-    }
+    "react-helmet-async": "^1.3.0",
+    "react-router-dom": "^6.3.0",
+    "vite": "^3.1.3"
   },
   "dependencies": {
     "@rollup/plugin-replace": "^3.0.0",
-    "@vue/server-renderer": "^3.2.26",
     "chalk": "^4.1.2",
     "connect": "^3.7.0",
     "node-fetch": "^2.6.1",
@@ -107,14 +68,9 @@
     "fs-extra": "^10.0.0",
     "npm-run-all": "^4.1.5",
     "playwright-chromium": "^1.13.1",
-    "prettier": "^2.4.1",
     "ts-node": "^10.1.0",
-    "typescript": "^4.2.3",
+    "typescript": "^4.8.4",
     "uvu": "^0.5.1",
-    "watchlist": "^0.2.3",
-    "yorkie": "^2.0.0"
-  },
-  "gitHooks": {
-    "commit-msg": "node scripts/verifyCommit.js"
+    "watchlist": "^0.2.3"
   }
 }

@@ -1,5 +1,5 @@
 const { defineConfig } = require('vite')
-const viteSSR = require('vite-ssr/plugin')
+const { viteSSRPlugin } = require('vite-ssr/plugin')
 const api = require('../node-server/api')
 
 module.exports = defineConfig({

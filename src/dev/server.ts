@@ -32,7 +32,7 @@ export const createSSRDevHandler = (
   options: SsrOptions = {}
 ) => {
   options = {
-    ...server.config.inlineConfig, // CLI flags
+    // ...server.config.inlineConfig, // CLI flags
     ...options,
   }
 
@@ -192,7 +192,7 @@ export function printServerInfo(server: ViteDevServer) {
 
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {
     info(
-      chalk.cyan(`\n  vite v${require('vite/package.json').version}`) +
+      chalk.cyan(`\n  vite`) +
         chalk.green(` dev server running at:\n`),
       { clear: !server.config.logger.hasWarned }
     )
@@ -213,3 +213,6 @@ export function printServerInfo(server: ViteDevServer) {
 
   info(ssrReadyMessage + '\n')
 }
+
+export const startServer = (options: Parameters<typeof createSsrServer>[0]) =>
+  createSsrServer(options).then((server) => server.listen())

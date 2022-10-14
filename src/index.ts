@@ -1,7 +1,6 @@
 // This file is overwritten by the plugin to
 // redirect to a specific implementation.
 
-// This is a generic mix of framework types
 declare module 'vite-ssr' {
   export const viteSSR: (
     App: any,
@@ -19,7 +18,5 @@ declare module 'vite-ssr' {
     ) => any
   ) => any
 
-  export default viteSSR
-  export const ClientOnly: any
   export const useContext: () => import('./utils/types').SharedContext
 }

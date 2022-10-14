@@ -11,7 +11,7 @@ async function serve(
   const srcDir = path.resolve(root)
 
   // build
-  await execa('yarn', ['build'], { cwd: srcDir })
+  await execa('npm', ['run', 'build'], { cwd: srcDir })
 
   // start prod server
   const app = createServer(srcDir)

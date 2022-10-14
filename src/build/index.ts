@@ -21,7 +21,7 @@ const cleanPathStart = (path: string): string =>
     ? cleanPathStart(path.substring(1))
     : path
 
-export = async (
+export const viteSSR = async (
   inlineBuildOptions: BuildOptions = {},
   _viteConfig?: ResolvedConfig
 ) =>
@@ -197,13 +197,9 @@ async function generatePackageJson(
       ((viteConfig.build?.ssr || serverBuildOptions.build?.ssr) as string)
   )
 
-  const moduleFormat =
-    (viteConfig.build?.rollupOptions?.output as OutputOptions)?.format ||
-    (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)?.format
-
   const packageJson = {
     main: outputFile ? ssrOutput.base : ssrOutput.name + '.js',
-    type: /^esm?$/i.test(moduleFormat || '') ? 'module' : 'commonjs',
+    type: 'module',
     ssr: {
       // This can be used later to serve static assets
       assets: (

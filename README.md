@@ -23,7 +23,7 @@ Start a new SSR project right away with filesystem routes, i18n, icons, markdown
 Create a normal [Vite](https://vitejs.dev/guide/) project for Vue or React.
 
 ```sh
-yarn create vite --template [vue|vue-ts|react|react-ts]
+yarn create vite --template [react|react-ts]
 ```
 
 Then, add `vite-ssr` with your package manager (direct dependency) and your framework router.
@@ -464,21 +464,6 @@ import { Helmet } from 'react-helmet-async'
 </p>
 </details>
 
-## Rendering only in client/browser
-
-Vite SSR exports `ClientOnly` component that renders its children only in the browser:
-
-```jsx
-import { ClientOnly } from 'vite-ssr'
-
-//...
-;<div>
-  <ClientOnly>
-    <div>...</div>
-  </ClientOnly>
-</div>
-```
-
 ## Development
 
 There are two ways to run the app locally for development:
@@ -494,7 +479,7 @@ If you want to run your own dev server (e.g. Express.js) instead of Vite's defau
 
 ```js
 const express = require('express')
-const { createSsrServer } = require('vite-ssr/dev')
+const { createSsrServer } = require('vite-ssr/dev/server')
 
 async function createServer() {
   const app = express()
@@ -539,25 +524,6 @@ export default {
 
 </p>
 </details>
-
-## Integrations
-
-Common integrations will be added here:
-
-### React CSS in JS
-
-Use the `styleCollector` option to specify an SSR style collector. `vite-ssr` exports 3 common CSS-in-JS integrations: `styled-components`, `material-ui-core-v4` and `emotion`:
-
-```js
-import viteSSR from 'vite-ssr/react'
-import styleCollector from 'vite-ssr/react/style-collectors/emotion'
-
-export default viteSSR(App, { routes, styleCollector })
-```
-
-You can provide your own by looking at the [implementation](./src/react/style-collectors/) of any of the existing collectors.
-
-Note that you still need to install all the required dependencies from these packages (e.g. `@emotion/server`, `@emotion/react` and `@emotion/cache` when using Emotion).
 
 ## Custom Typings
 

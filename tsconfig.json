@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "target": "ES2019",
-    "module": "CommonJS",
+    "target": "ES2022",
+    "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "esModuleInterop": true,
     "allowJs": true,
@@ -21,6 +21,5 @@
     "noFallthroughCasesInSwitch": false,
     "removeComments": false
   },
-  "include": ["./src"],
-  "exclude": ["./src/vue/*", "./src/react/*", "./src/utils/*"]
+  "include": ["./src"]
 }

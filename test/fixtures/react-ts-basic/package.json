@@ -10,12 +10,12 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-helmet-async": "^1.0.9",
-    "react-router-dom": "^6.2.2"
+    "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
     "@types/connect": "^3.4.35",
     "@types/node": "^16.4.7",
-    "@vitejs/plugin-react": "^1.1.3",
+    "@vitejs/plugin-react": "^2.1.0",
     "typescript": "^4.3.2",
     "vite": "2.9.x"
   }
