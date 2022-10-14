@@ -148,14 +148,6 @@ export async function createSsrServer(
     server: options.server || { ...options },
   })
 
-  if (options.polyfills !== false) {
-    if (!globalThis.fetch) {
-      const fetch = await import('node-fetch')
-      // @ts-ignore
-      globalThis.fetch = fetch.default || fetch
-    }
-  }
-
   const isMiddlewareMode =
     // @ts-ignore
     options?.middlewareMode || options?.server?.middlewareMode
