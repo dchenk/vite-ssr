@@ -1,14 +1,14 @@
 import { getMarkupFromTree } from '@apollo/client/react/ssr';
-import { createElement, ReactElement, ReactNode, Suspense } from 'react'
-import ssrPrepass from 'react-ssr-prepass'
-import { renderToString } from 'react-dom/server'
-import { StaticRouter } from 'react-router-dom/server'
-import { HelmetProvider } from 'react-helmet-async'
-import { getFullPath, withoutSuffix } from '../utils/route'
-import { createRouter } from './utils'
-import coreViteSSR from '../core/entry-server.js'
-import type { Context, SsrHandler } from './types'
-import { provideContext } from './components.js'
+import { createElement, ReactElement, ReactNode, Suspense } from 'react';
+import ssrPrepass from 'react-ssr-prepass';
+import { renderToString } from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
+import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
+import { getFullPath, withoutSuffix } from '../utils/route';
+import { createRouter } from './utils';
+import { coreViteSSR, SSRPageDescriptor } from '../core/entry-server';
+import type { Context, SsrHandler } from './types';
+import { provideContext } from './components.js';
 
 export { useContext } from './components.js'
 
@@ -18,7 +18,7 @@ const render = (component: ReactNode) =>
     renderFunction: renderToString
   });
 
-const viteSSR: SsrHandler = function (
+export const viteSSR: SsrHandler = function (
   App,
   {
     routes,
@@ -26,12 +26,11 @@ const viteSSR: SsrHandler = function (
     prepassVisitor,
     PropsProvider,
     pageProps,
-    styleCollector,
     ...options
   },
   hook
 ) {
-  return coreViteSSR(options, async (ctx, { isRedirect, ...extra }) => {
+  return coreViteSSR(options, async (ctx, { isRedirect, ...extra }): Promise<SSRPageDescriptor> => {
     const context = ctx as Context
     context.router = createRouter({
       routes,
@@ -49,7 +48,7 @@ const viteSSR: SsrHandler = function (
 
     const routeBase = base && withoutSuffix(base(context), '/')
     const fullPath = getFullPath(context.url, routeBase)
-    const helmetContext: Record<string, Record<string, string>> = {}
+    const helmetContext: Partial<HelmetData['context']> = {}
 
     let app: ReactElement = createElement(
       Suspense,
@@ -65,16 +64,10 @@ const viteSSR: SsrHandler = function (
       )
     )
 
-    const styles = styleCollector && (await styleCollector(context))
-    if (styles) {
-      app = styles.collect(app)
-    }
-
     await ssrPrepass(app, prepassVisitor)
     const body = await render(app)
 
     if (isRedirect()) {
-      styles && styles.cleanup && styles.cleanup()
       return {}
     }
 
@@ -87,23 +80,18 @@ const viteSSR: SsrHandler = function (
     }
 
     const {
-      htmlAttributes: htmlAttrs = '',
-      bodyAttributes: bodyAttrs = '',
+      htmlAttributes,
+      bodyAttributes,
       ...tags
-    } = helmetContext.helmet || {}
+    } = helmetContext.helmet || {} as HelmetServerState;
 
-    const styleTags: string = (styles && styles.toString(body)) || ''
-    styles && styles.cleanup && styles.cleanup()
+    const htmlAttrs = (htmlAttributes || '').toString();
+    const bodyAttrs = (bodyAttributes || '').toString();
 
-    const headTags =
-      Object.keys(tags)
-        .map((key) => (tags[key] || '').toString())
-        .join('') +
-      '\n' +
-      styleTags
+    const headTags = Object.values(tags)
+      .map(tag => tag.toString())
+      .join('');
 
     return { body, headTags, htmlAttrs, bodyAttrs }
-  })
+  });
 }
-
-export default viteSSR

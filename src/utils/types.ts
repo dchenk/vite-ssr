@@ -26,7 +26,7 @@ export interface SharedOptions {
   transformState?: (
     state: any,
     defaultTransformer: (state: any) => any
-  ) => any | Promise<any>
+  ) => any
 }
 
 export interface SharedContext {
@@ -46,7 +46,7 @@ export interface WriteResponse {
   headers?: Record<string, string>
 }
 
-export interface Rendered extends WriteResponse {
+export type Rendered = WriteResponse & {
   html: string
   htmlAttrs: string
   headTags: string
@@ -69,7 +69,5 @@ export interface RendererOptions {
 }
 
 export interface Renderer {
-  (url: string | URL, options?: RendererOptions): Promise<
-    Rendered | WriteResponse
-  >
+  (url: string | URL, options?: RendererOptions): Promise<Rendered | WriteResponse>
 }

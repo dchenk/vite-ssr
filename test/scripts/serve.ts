@@ -36,7 +36,6 @@ export default serve
 // This is a simple Node server that uses the built project.
 
 function createServer(projectPath: string) {
-  global.fetch = require('node-fetch')
   // This contains a list of static routes (assets)
   const { ssr } = require(path.join(projectPath, 'dist/server/package.json'))
 

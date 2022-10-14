@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "npm-run-all dev:* --parallel dev:watch:* ",
     "dev:clean": "rm -rf node_modules/vite-ssr && mkdir node_modules/vite-ssr",
-    "dev:copy": "cp package.json node_modules/vite-ssr/",
+    "dev:copy": "cp package.json node_modules/vite-ssr-react/",
     "test": "uvu -r ts-node/register test/specs",
     "test:watch": "watchlist src test -- yarn test",
-    "pretest": "npm run build:compile --outDir ./node_modules/vite-ssr && npm run dev:copy",
+    "pretest": "npm run build:compile --outDir ./node_modules/vite-ssr-react && npm run dev:copy",
     "build": "npm-run-all build:*",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:copy": "cp README.md LICENSE dist/",
@@ -20,10 +20,11 @@
   "files": ["dist"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frandiox/vite-ssr.git"
+    "url": "git+https://github.com/dchenk/vite-ssr.git"
   },
   "keywords": [
     "vite",
+    "vite-plugin",
     "ssr",
     "react"
   ],

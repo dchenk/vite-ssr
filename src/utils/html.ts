@@ -64,7 +64,7 @@ export function buildHtmlDocument(
   }
 
   if (headTags) {
-    template = template.replace('</head>', `\n${headTags}\n</head>`)
+    template = template.replace('</head>', `\n${headTags}</head>`)
   }
 
   return template.replace(

@@ -6,11 +6,11 @@ import {
 } from 'react';
 import type { Context } from './types';
 
-const SSR_CONTEXT = reactCreateContext(null as any)
+const SSR_CONTEXT = reactCreateContext<Context>(null as never);
+
 export function provideContext(app: ReactElement, context: Context) {
   return createElement(SSR_CONTEXT.Provider, { value: context }, app)
 }
 
-export function useContext() {
-  return reactUseContext(SSR_CONTEXT) as Context
-}
+export const useContext = (): Context =>
+  reactUseContext(SSR_CONTEXT);

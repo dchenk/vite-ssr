@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { viteSSR } from './build'
-import { startServer } from './dev/server'
+import { buildViteSSR } from './build';
+import { startServer } from './dev/server';
 
 const [, , ...args] = process.argv
 
@@ -21,7 +21,7 @@ if (command === 'build') {
   (async () => {
     const { mode, ssr, watch } = options
 
-    await viteSSR({
+    await buildViteSSR({
       clientOptions: { mode, build: { watch } },
       serverOptions: { mode, build: { ssr } },
     })

@@ -6,13 +6,25 @@ import {
   findDependencies,
   renderPreloadLinks,
 } from '../utils/html'
-import type {
-  SsrHandler,
-  SsrRenderer,
-  Context,
-  Options,
-  SSRPageDescriptor,
-} from './types'
+import type { Renderer, SharedContext, SharedOptions } from '../utils/types';
+
+interface SsrHandler {
+  (p1: SharedOptions, p2?: SsrRenderer): Renderer
+}
+
+export interface SsrRenderer {
+  (
+    context: SharedContext,
+    utils: { isRedirect: () => boolean; [key: string]: unknown }
+  ): Promise<SSRPageDescriptor>
+}
+
+export interface SSRPageDescriptor {
+  headTags?: string
+  htmlAttrs?: string
+  bodyAttrs?: string
+  body?: string
+}
 
 const getEmptyHtmlParts = () => ({
   headTags: '',
@@ -23,9 +35,9 @@ const getEmptyHtmlParts = () => ({
   dependencies: [] as string[],
 })
 
-export const viteSSR: SsrHandler = function viteSSR(options, hook) {
+export const coreViteSSR: SsrHandler = function viteSSR(options, hook) {
   const renderer: SsrRenderer = hook || (options as SsrRenderer)
-  const { transformState = serializeState } = options as Options
+  const { transformState = serializeState } = options as Pick<SharedOptions, 'transformState'>
 
   return async function (
     url,
@@ -47,14 +59,14 @@ export const viteSSR: SsrHandler = function viteSSR(options, hook) {
     const { deferred, response, writeResponse, redirect, isRedirect } =
       useSsrResponse()
 
-    const context = {
+    const context: SharedContext = {
       url,
       isClient: false,
       initialState: {},
       redirect,
       writeResponse,
       ...extra,
-    } as Context
+    };
 
     // Wait for either rendering finished or redirection detected
     const payload = await Promise.race([
@@ -94,5 +106,3 @@ export const viteSSR: SsrHandler = function viteSSR(options, hook) {
     }
   }
 }
-
-export default viteSSR

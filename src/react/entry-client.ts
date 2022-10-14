@@ -1,14 +1,50 @@
-import React, { ReactElement } from 'react'
-import ReactDOM from 'react-dom/client'
-import createClientContext from '../core/entry-client.js'
-import { BrowserRouter, useNavigate } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
-import { withoutSuffix } from '../utils/route'
-import { createRouter } from './utils'
-import type { ClientHandler, Context } from './types'
+import React, { ReactElement } from 'react';
+import ReactDOM from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
+import { BrowserRouter } from 'react-router-dom';
+import { deserializeState } from '../utils/deserialize-state';
+import { withoutSuffix } from '../utils/route';
+import type { PagePropsOptions, SharedOptions } from '../utils/types';
+import type { ClientHandler, ClientOptions, Context } from './types';
+import { createRouter } from './utils';
+import { provideContext } from './components.js';
 
-import { provideContext } from './components.js'
-export { useContext } from './components.js'
+export { useContext } from './components.js';
+
+const createClientContext = (
+  url: URL,
+  transformState: SharedOptions['transformState'] = deserializeState,
+  routes: ClientOptions['routes'],
+  base: ClientOptions['base'],
+  pagePropsOptions: PagePropsOptions | undefined,
+  PropsProvider: ClientOptions['PropsProvider'],
+): Context => {
+  // Deserialize the state included in the DOM.
+  const initialState = transformState(
+    // @ts-ignore
+    window.__INITIAL_STATE__,
+    deserializeState,
+  ) || {};
+
+  return {
+    url,
+    isClient: true,
+    initialState,
+    redirect: () => {
+      console.warn('[SSR] Do not call redirect in browser');
+    },
+    writeResponse: () => {
+      console.warn('[SSR] Do not call writeResponse in browser');
+    },
+    router: createRouter({
+      routes,
+      base,
+      initialState,
+      pagePropsOptions,
+      PropsProvider,
+    }),
+  };
+};
 
 export const viteSSR: ClientHandler = async function (
   App,
@@ -19,34 +55,26 @@ export const viteSSR: ClientHandler = async function (
     PropsProvider,
     pageProps,
     debug = {},
-    styleCollector,
     ...options
   },
-  hook
+  hook,
 ) {
-  const url = new URL(window.location.href)
-  const routeBase = base && withoutSuffix(base({ url }), '/')
+  const url = new URL(window.location.href);
+  const routeBase = base && withoutSuffix(base({ url }), '/');
 
-  const ctx = await createClientContext({
-    ...options,
+  const ctx = await createClientContext(
     url,
-    spaRedirect: (location) => {
-      const navigate = useNavigate()
-      React.useEffect(() => navigate(location), [navigate])
-    },
-  })
-
-  const context = ctx as Context
-  context.router = createRouter({
+    options.transformState,
     routes,
     base,
-    initialState: context.initialState,
-    pagePropsOptions: pageProps,
+    pageProps,
     PropsProvider,
-  })
+  );
+
+  const context = ctx as Context;
 
   if (hook) {
-    await hook(context)
+    await hook(context);
   }
 
   let app: ReactElement = React.createElement(
@@ -59,29 +87,22 @@ export const viteSSR: ClientHandler = async function (
         // @ts-ignore
         BrowserRouter,
         { basename: routeBase },
-        provideContext(React.createElement(App, context), context)
-      )
-    )
-  )
-
-  const styles = styleCollector && (await styleCollector(context))
-  if (styles && styles.provide) {
-    app = styles.provide(app)
-  }
+        provideContext(React.createElement(App, context), context),
+      ),
+    ),
+  );
 
   if (debug.mount !== false) {
     // @ts-ignore
-    const el = document.getElementById(__CONTAINER_ID__)
-
-    styles && styles.cleanup && styles.cleanup()
+    const el = document.getElementById(__CONTAINER_ID__);
 
     // @ts-ignore
     __DEV__
       ? // @ts-ignore
-        ReactDOM.createRoot(el).render(app)
+      ReactDOM.createRoot(el).render(app)
       : // @ts-ignore
-        ReactDOM.hydrateRoot(el, app)
+      ReactDOM.hydrateRoot(el, app);
   }
-}
+};
 
-export default viteSSR
+export default viteSSR;

@@ -1,13 +1,12 @@
 // This file is overwritten by the plugin to
 // redirect to a specific implementation.
 
-declare module 'vite-ssr' {
+declare module 'vite-ssr-react' {
   export const viteSSR: (
     App: any,
     options: import('./utils/types').SharedOptions & {
-      routes: Array<Record<string, any>>
-      routerOptions?: Record<string, any>
-      styleCollector?: (ctx: any) => any
+      routes: Array<Record<string, any>>;
+      routerOptions?: Record<string, any>;
     },
     hook?: (
       params: import('./utils/types').SharedContext & {

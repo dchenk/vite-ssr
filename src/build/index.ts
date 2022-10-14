@@ -21,7 +21,7 @@ const cleanPathStart = (path: string): string =>
     ? cleanPathStart(path.substring(1))
     : path
 
-export const viteSSR = async (
+export const buildViteSSR = async (
   inlineBuildOptions: BuildOptions = {},
   _viteConfig?: ResolvedConfig
 ) =>

@@ -42,7 +42,7 @@ export const INDEX_HTML = 'index.html'
 
 export function getPluginOptions(viteConfig: ResolvedConfig) {
   return ((
-    viteConfig.plugins.find((plugin) => plugin.name === 'vite-ssr') as any
+    viteConfig.plugins.find((plugin) => plugin.name === 'vite-ssr-react') as any
   )?.viteSsrOptions || {}) as ViteSsrPluginOptions
 }
 

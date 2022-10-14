@@ -3,15 +3,13 @@ import { normalizePath } from 'vite';
 import type { ViteSsrPluginOptions } from './config';
 import { createSSRDevHandler, SsrOptions } from './dev/server';
 
-const pluginName = 'vite-ssr'
-const entryServer = '/entry-server'
-const entryClient = '/entry-client'
+const pluginName = 'vite-ssr-react';
 
 export function viteSSRPlugin(
   options: ViteSsrPluginOptions & SsrOptions = {}
 ): Array<Plugin & Record<string, any>> {
   const nameToMatch = options.plugin || pluginName;
-  const autoEntryRE = new RegExp(`${nameToMatch}(\/core|\/react)?$`);
+  const autoEntryRE = new RegExp(`${nameToMatch}/react`);
 
   return [
     {
@@ -37,8 +35,8 @@ export function viteSSRPlugin(
         config.optimizeDeps = config.optimizeDeps || {}
         config.optimizeDeps.include = config.optimizeDeps.include || []
         config.optimizeDeps.include.push(
-          nameToMatch + '/react' + entryClient,
-          nameToMatch + '/react' + entryServer
+          `${nameToMatch}/react/entry-client`,
+          `${nameToMatch}/react/entry-server`,
         )
       },
       async configureServer(server) {
