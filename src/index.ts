@@ -1,21 +1,15 @@
-// This file is overwritten by the plugin to
-// redirect to a specific implementation.
+// This file is overwritten by the plugin to redirect to either entry-client or entry-server.
+import type { ClientHandler, SsrHandler } from './react/types';
+import type { SharedContext, SharedOptions } from './utils/types';
 
-declare module 'vite-ssr-react' {
-  export const viteSSR: (
-    App: any,
-    options: import('./utils/types').SharedOptions & {
-      routes: Array<Record<string, any>>;
-      routerOptions?: Record<string, any>;
+export declare function viteSSR (
+  App: any,
+  options: SharedOptions,
+  hook: (
+    params: SharedContext & {
+      app: any
+      router: any
+      initialRoute: any
     },
-    hook?: (
-      params: import('./utils/types').SharedContext & {
-        app: any
-        router: any
-        initialRoute: any
-      }
-    ) => any
-  ) => any
-
-  export const useContext: () => import('./utils/types').SharedContext
-}
+  ) => any,
+): ClientHandler | SsrHandler;

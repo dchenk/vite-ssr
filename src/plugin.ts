@@ -1,5 +1,4 @@
 import type { Plugin } from 'vite';
-import { normalizePath } from 'vite';
 import type { ViteSsrPluginOptions } from './config';
 import { createSSRDevHandler, SsrOptions } from './dev/server';
 
@@ -9,7 +8,6 @@ export function viteSSRPlugin(
   options: ViteSsrPluginOptions & SsrOptions = {}
 ): Array<Plugin & Record<string, any>> {
   const nameToMatch = options.plugin || pluginName;
-  const autoEntryRE = new RegExp(`${nameToMatch}/react`);
 
   return [
     {
@@ -48,26 +46,14 @@ export function viteSSRPlugin(
 
       // Implement auto-entry using virtual modules:
       resolveId(source, importer, options) {
-        if (source.includes(nameToMatch)) {
-          source = normalizePath(source)
-          if (autoEntryRE.test(source)) {
-            return `virtual:${source}/index.js`
-          }
+        if (source === nameToMatch) {
+          return `virtual:${nameToMatch}/dist/index.js`
         }
       },
       load(id, options) {
-        if (id.startsWith(`virtual:${nameToMatch}`)) {
-          id = normalizePath(id)
-          let [, lib = ''] = id.split('/')
-          if (lib === 'index.js') {
-            lib = 'react';
-          }
-
-          const libPath = `'${nameToMatch}/${lib}/entry-${
-            options?.ssr ? 'server' : 'client'
-          }'`
-
-          return `export * from ${libPath}; export { default } from ${libPath}`
+        if (id === `virtual:${nameToMatch}/dist/index.js`) {
+          const libPath = `${nameToMatch}/dist/react/entry-${options?.ssr ? 'server' : 'client'}.js`
+          return `export { viteSSR } from '${libPath}';`;
         }
       },
     },

@@ -1,24 +1,17 @@
-import React, { ReactElement } from 'react';
+import { createElement, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
+import { ContextProvider } from '../context';
 import { deserializeState } from '../utils/deserialize-state';
 import { withoutSuffix } from '../utils/route';
-import type { PagePropsOptions, SharedOptions } from '../utils/types';
-import type { ClientHandler, ClientOptions, Context } from './types';
-import { createRouter } from './utils';
-import { provideContext } from './components.js';
-
-export { useContext } from './components.js';
+import type { SharedContext, SharedOptions } from '../utils/types';
+import type { ClientHandler } from './types';
 
 const createClientContext = (
   url: URL,
   transformState: SharedOptions['transformState'] = deserializeState,
-  routes: ClientOptions['routes'],
-  base: ClientOptions['base'],
-  pagePropsOptions: PagePropsOptions | undefined,
-  PropsProvider: ClientOptions['PropsProvider'],
-): Context => {
+): SharedContext => {
   // Deserialize the state included in the DOM.
   const initialState = transformState(
     // @ts-ignore
@@ -36,23 +29,14 @@ const createClientContext = (
     writeResponse: () => {
       console.warn('[SSR] Do not call writeResponse in browser');
     },
-    router: createRouter({
-      routes,
-      base,
-      initialState,
-      pagePropsOptions,
-      PropsProvider,
-    }),
   };
 };
 
 export const viteSSR: ClientHandler = async function (
   App,
   {
-    routes,
     base,
     suspenseFallback,
-    PropsProvider,
     pageProps,
     debug = {},
     ...options
@@ -62,32 +46,23 @@ export const viteSSR: ClientHandler = async function (
   const url = new URL(window.location.href);
   const routeBase = base && withoutSuffix(base({ url }), '/');
 
-  const ctx = await createClientContext(
+  const context = await createClientContext(
     url,
     options.transformState,
-    routes,
-    base,
-    pageProps,
-    PropsProvider,
   );
 
-  const context = ctx as Context;
+  await hook(context);
 
-  if (hook) {
-    await hook(context);
-  }
-
-  let app: ReactElement = React.createElement(
-    React.Suspense,
+  let app = createElement(
+    Suspense,
     { fallback: suspenseFallback || '' },
-    React.createElement(
+    createElement(
       HelmetProvider,
       {},
-      React.createElement(
-        // @ts-ignore
+      createElement(
         BrowserRouter,
         { basename: routeBase },
-        provideContext(React.createElement(App, context), context),
+         createElement(ContextProvider, { value: context }, createElement(App, context))
       ),
     ),
   );
@@ -104,5 +79,3 @@ export const viteSSR: ClientHandler = async function (
       ReactDOM.hydrateRoot(el, app);
   }
 };
-
-export default viteSSR;

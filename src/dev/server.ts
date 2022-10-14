@@ -185,15 +185,13 @@ export function printServerInfo(server: ViteDevServer) {
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {
     info(
       chalk.cyan(`\n  vite`) +
-        chalk.green(` dev server running at:\n`),
+        chalk.green(' dev server running at:'),
       { clear: !server.config.logger.hasWarned }
     )
 
     // @ts-ignore
     server.printUrls()
   }
-
-  info('\n -- SSR mode\n')
 }
 
 export const startServer = (options: Parameters<typeof createSsrServer>[0]) =>

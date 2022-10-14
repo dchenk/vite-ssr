@@ -6,7 +6,7 @@
     "lib": ["ESNext", "DOM"],
     "esModuleInterop": true,
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "strict": true,
     "strictNullChecks": true,
     "moduleResolution": "Node",

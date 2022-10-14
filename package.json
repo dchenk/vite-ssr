@@ -1,8 +1,7 @@
 {
   "name": "vite-ssr-react",
-  "version": "0.17.3",
+  "version": "0.18.0",
   "description": "Vite utility for server side rendering",
-  "main": "./dist/index.js",
   "scripts": {
     "dev": "npm-run-all dev:* --parallel dev:watch:* ",
     "dev:clean": "rm -rf node_modules/vite-ssr && mkdir node_modules/vite-ssr",
@@ -34,8 +33,9 @@
     "url": "https://github.com/dchenk/vite-ssr/issues"
   },
   "homepage": "https://github.com/dchenk/vite-ssr#readme",
-  "bin": "./dist/cli.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": "./dist/cli.js",
   "workspaces": [
     "examples/react-apollo",
     "test/fixtures/*"

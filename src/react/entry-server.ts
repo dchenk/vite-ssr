@@ -1,16 +1,14 @@
 import { getMarkupFromTree } from '@apollo/client/react/ssr';
-import { createElement, ReactElement, ReactNode, Suspense } from 'react';
+import { createElement, ReactNode, Suspense } from 'react';
 import ssrPrepass from 'react-ssr-prepass';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
-import { getFullPath, withoutSuffix } from '../utils/route';
-import { createRouter } from './utils';
+import { ContextProvider } from '../context';
 import { coreViteSSR, SSRPageDescriptor } from '../core/entry-server';
-import type { Context, SsrHandler } from './types';
-import { provideContext } from './components.js';
-
-export { useContext } from './components.js'
+import { getFullPath, withoutSuffix } from '../utils/route';
+import type { SharedContext } from '../utils/types';
+import type { SsrHandler } from './types';
 
 const render = (component: ReactNode) =>
   getMarkupFromTree({
@@ -21,28 +19,20 @@ const render = (component: ReactNode) =>
 export const viteSSR: SsrHandler = function (
   App,
   {
-    routes,
     base,
     prepassVisitor,
-    PropsProvider,
     pageProps,
     ...options
   },
   hook
 ) {
   return coreViteSSR(options, async (ctx, { isRedirect, ...extra }): Promise<SSRPageDescriptor> => {
-    const context = ctx as Context
-    context.router = createRouter({
-      routes,
-      base,
-      initialState: (extra.initialState as Record<string, unknown>) || null,
-      pagePropsOptions: pageProps,
-      PropsProvider,
-    })
+    const context: SharedContext = {
+      ...ctx,
+    };
 
-    if (hook) {
-      context.initialState = (await hook(context)) || context.initialState
-    }
+    // context.initialState = (await hook(context)) || context.initialState
+    await hook(context);
 
     if (isRedirect()) return {}
 
@@ -50,7 +40,7 @@ export const viteSSR: SsrHandler = function (
     const fullPath = getFullPath(context.url, routeBase)
     const helmetContext: Partial<HelmetData['context']> = {}
 
-    let app: ReactElement = createElement(
+    const app = createElement(
       Suspense,
       { fallback: '' },
       createElement(
@@ -59,7 +49,7 @@ export const viteSSR: SsrHandler = function (
         createElement(
           StaticRouter,
           { basename: routeBase, location: fullPath },
-          provideContext(createElement(App, context), context)
+          createElement(ContextProvider, { value: context }, createElement(App, context))
         )
       )
     )

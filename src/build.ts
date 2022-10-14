@@ -1,4 +1,3 @@
-import { build, InlineConfig, ResolvedConfig, mergeConfig } from 'vite'
 import replace from '@rollup/plugin-replace'
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -8,13 +7,14 @@ import {
   INDEX_HTML,
   resolveViteConfig,
   BuildOptions,
-} from '../config'
+} from './config'
 import type {
   RollupOutput,
   RollupWatcher,
   OutputAsset,
   OutputOptions,
 } from 'rollup'
+import { build, InlineConfig, ResolvedConfig, mergeConfig } from 'vite'
 
 const cleanPathStart = (path: string): string =>
   path.startsWith('/') || path.startsWith('.')
