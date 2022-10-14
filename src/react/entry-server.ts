@@ -20,6 +20,7 @@ export const viteSSR: SsrHandler = function (
   App,
   {
     base,
+    suspenseFallback,
     prepassVisitor,
     pageProps,
     ...options
@@ -31,10 +32,11 @@ export const viteSSR: SsrHandler = function (
       ...ctx,
     };
 
-    // context.initialState = (await hook(context)) || context.initialState
     await hook(context);
 
-    if (isRedirect()) return {}
+    if (isRedirect()) {
+      return {};
+    }
 
     const routeBase = base && withoutSuffix(base(context), '/')
     const fullPath = getFullPath(context.url, routeBase)
@@ -42,7 +44,7 @@ export const viteSSR: SsrHandler = function (
 
     const app = createElement(
       Suspense,
-      { fallback: '' },
+      { fallback: suspenseFallback || '' },
       createElement(
         HelmetProvider,
         { context: helmetContext },
@@ -58,15 +60,7 @@ export const viteSSR: SsrHandler = function (
     const body = await render(app)
 
     if (isRedirect()) {
-      return {}
-    }
-
-    const currentRoute = context.router.getCurrentRoute()
-    if (currentRoute) {
-      Object.assign(
-        context.initialState || {},
-        (currentRoute.meta || {}).state || {}
-      )
+      return {};
     }
 
     const {

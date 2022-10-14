@@ -53,7 +53,7 @@ export const viteSSR: ClientHandler = async function (
 
   await hook(context);
 
-  let app = createElement(
+  const app = createElement(
     Suspense,
     { fallback: suspenseFallback || '' },
     createElement(
