@@ -1,19 +1,4 @@
-export function findDependencies(
-  modules: string[],
-  manifest: Record<string, string[]>,
-) {
-  const files = new Set<string>();
-
-  for (const id of modules || []) {
-    for (const file of manifest[id] || []) {
-      files.add(file);
-    }
-  }
-
-  return [...files];
-}
-
-export function renderPreloadLinks(files: string[]) {
+export function renderPreloadLinks(files: string[]): string {
   let link = '';
 
   for (const file of files || []) {
@@ -27,28 +12,30 @@ export function renderPreloadLinks(files: string[]) {
   return link;
 }
 
-// @ts-ignore
-const containerId = __CONTAINER_ID__ as string;
+const containerId = 'app';
 
 const containerRE = new RegExp(
   `<div id="${containerId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`,
 );
 
-type DocParts = {
+export type PageDescriptor = {
+  headTags?: string
   htmlAttrs?: string
   bodyAttrs?: string
-  headTags?: string
   body?: string
+};
+
+export type DocParts = PageDescriptor & {
   initialState?: string
-}
+};
 
 export function buildHtmlDocument(
   template: string,
   { htmlAttrs, bodyAttrs, headTags, body, initialState }: DocParts,
-) {
-  // @ts-ignore
+): string {
+  // @ts-expect-error -- __DEV__ is injected by Vite.
   if (__DEV__) {
-    if (template.indexOf(`id="${containerId}"`) === -1) {
+    if (!template.includes(`id="${containerId}"`)) {
       console.warn(
         `[SSR] Container with id "${containerId}" was not found in index.html`,
       );

@@ -21,14 +21,9 @@ export interface BuildOptions {
 
 export interface ViteSsrPluginOptions {
   /**
-   * Path to entry index.html
-   * @default '<root>/index.html'
+   * Path to the entry index.html file.
    */
-  input?: string
-  /**
-   * ID of the app container in index.html. Defaults to "app".
-   */
-  containerId?: string
+  input: string
   build?: BuildOptions & {
     /**
      * Keep the index.html generated in the client build
@@ -46,7 +41,7 @@ export function getPluginOptions(viteConfig: ResolvedConfig) {
   )?.viteSsrOptions || {}) as ViteSsrPluginOptions;
 }
 
-export async function resolveViteConfig(mode?: string) {
+export function resolveViteConfig(mode?: string): Promise<ResolvedConfig> {
   return resolveConfig(
     {},
     'build',
@@ -64,7 +59,7 @@ export async function getEntryPoint(
 
   if (!indexHtml) {
     indexHtml = await fs.promises.readFile(
-      getPluginOptions(config).input || path.resolve(config.root, INDEX_HTML),
+      getPluginOptions(config).input,
       'utf-8',
     );
   }

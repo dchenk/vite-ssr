@@ -1,43 +1,12 @@
 import type { ServerResponse } from 'http';
-import type { IncomingMessage } from 'connect';
+import type { Request } from 'express';
 
-export interface Meta {
-  propsGetter?: boolean | string
-  state?: Record<string, any> | null
-  [key: string]: any
-}
-
-export interface Base {
-  (params: { url: Location | URL }): string
-}
-
-export interface State {
-  [key: string]: any
-}
-
-export interface PagePropsOptions {
-  passToPage?: boolean
-}
-
-export interface SharedOptions {
-  base?: Base
-  debug?: { mount?: boolean }
-  pageProps?: PagePropsOptions
-  transformState?: (
-    state: any,
-    defaultTransformer: (state: any) => any
-  ) => any
-}
-
-export interface SharedContext {
-  url: URL | Location
-  isClient: boolean
-  initialState: Record<string, any>
-  redirect: (location: string, status?: number) => void
-  writeResponse: (params: WriteResponse) => void
-  request?: IncomingMessage
-  response?: ServerResponse
-  [key: string]: any
+export interface Context<InitialState> {
+  initialState: InitialState;
+  // writeResponse is defined only in SSR.
+  writeResponse?: (params: WriteResponse) => void;
+  // modules is added by the plugin if necessary.
+  modules?: string[];
 }
 
 export interface WriteResponse {
@@ -46,28 +15,30 @@ export interface WriteResponse {
   headers?: Record<string, string>
 }
 
-export type Rendered = WriteResponse & {
+export type Rendered<InitialState> = WriteResponse & {
+  initialState: InitialState;
   html: string
   htmlAttrs: string
   headTags: string
   body: string
   bodyAttrs: string
-  initialState: any
   dependencies: string[]
 }
 
 export interface RendererOptions {
+  url: string;
   /* Client manifest. Required for preloading. */
-  manifest?: Record<string, string[]>
-  /* Add prelaod link tags for JS and CSS assets */
-  preload?: boolean
-  /* Override index.html template */
-  template?: string
-  /* Skip SSR and only return the default index.html */
-  skip?: boolean
-  [key: string]: any
+  manifest?: Record<string, string[]>;
+  /* Add preload link tags for JS and CSS assets */
+  preload: boolean;
+  request: Request;
+  response: ServerResponse;
 }
 
-export interface Renderer {
-  (url: string | URL, options?: RendererOptions): Promise<Rendered | WriteResponse>
+export interface Renderer<InitialState> {
+  (
+    options: RendererOptions,
+    // writeResponse: (params: WriteResponse) => void,
+    // isRedirect: () => boolean,
+  ): Promise<Rendered<InitialState> | WriteResponse>
 }

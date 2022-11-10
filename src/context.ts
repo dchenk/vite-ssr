@@ -1,11 +1,9 @@
 import { createContext as reactCreateContext, useContext as reactUseContext } from 'react';
-import type { SharedContext } from './utils/types';
+import type { Context } from './utils/types';
 
-export type Context = SharedContext;
-
-const SSR_CONTEXT = reactCreateContext<SharedContext>(null as never);
+const SSR_CONTEXT = reactCreateContext<Context<never>>(null as never);
 
 export const ContextProvider = SSR_CONTEXT.Provider;
 
-export const useContext = (): SharedContext =>
+export const useContext = <T>(): Context<T> =>
   reactUseContext(SSR_CONTEXT);

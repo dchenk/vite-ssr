@@ -2,8 +2,9 @@ import path from 'path';
 import http from 'http';
 import execa from 'execa';
 import express from 'express';
+
 /**
- * Givin a vue-ssr app path, it builds in and serve it in production mode with express
+ * Given an app path, build it and serve it in production mode with Express.
  */
 async function serve(
   root: string,
@@ -14,7 +15,7 @@ async function serve(
   await execa('npm', ['run', 'build'], { cwd: srcDir });
 
   // start prod server
-  const app = createServer(srcDir);
+  const app = await createServer(srcDir);
 
   return new Promise((resolve, reject) => {
     try {
@@ -35,18 +36,18 @@ export default serve;
 
 // This is a simple Node server that uses the built project.
 
-function createServer(projectPath: string) {
+async function createServer(projectPath: string) {
   // This contains a list of static routes (assets)
-  const { ssr } = require(path.join(projectPath, 'dist/server/package.json'));
+  const { ssr } = await import(path.join(projectPath, 'dist/server/package.json'));
 
   // The manifest is required for preloading assets
-  const manifest = require(path.join(
+  const manifest = await import(path.join(
     projectPath,
     'dist/client/ssr-manifest.json',
   ));
 
   // This is the server renderer we just built
-  const { default: renderPage } = require(path.join(projectPath, 'dist/server'));
+  const { default: renderPage } = await import(path.join(projectPath, 'dist/server'));
 
   const server = express();
 

@@ -33,7 +33,7 @@ Add Vite SSR plugin to your Vite config file (see [`vite.config.js`](./examples/
 ```js
 // vite.config.js
 import react from '@vitejs/plugin-react';
-import viteSSR from 'vite-ssr/plugin.js';
+import viteSSR from 'vite-ssr-react/plugin.js';
 
 export default {
   plugins: [
@@ -71,7 +71,6 @@ The previous handler accepts the following options as its second argument:
 - `routes`: Array of routes, according to each framework's router (see [`vue-router`](https://next.router.vuejs.org/api/#routerecordraw) or [`react-router-config`](https://www.npmjs.com/package/react-router-config#route-configuration-shape)).
 - `base`: Function that returns a string with the router base. Can be useful for i18n routes or when the app is not deployed at the domain root.
 - `transformState`: Modify the state to be serialized or deserialized. See [State serialization](#state-serialization) for more information.
-- `pageProps.passToPage`: Whether each route's `initialState` should be automatically passed to the page components as props.
 - `debug.mount`: Pass `false` to prevent mounting the app in the client. You will need to do this manually on your own but it's useful to see differences between SSR and hydration.
 
 </p>
@@ -84,11 +83,9 @@ The context passed to the main hook (and to React's root component) contains:
 
 - `initialState`: Object that can be mutated during SSR to save any data to be serialized. This same object and data can be read in the browser.
 - `url`: Initial [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL).
-- `isClient`: Boolean similar to `import.meta.env.SSR`. Unlike the latter, `isClient` does not trigger tree shaking.
 - `request`: Available during SSR.
 - `redirect`: Isomorphic function to redirect to a different URL.
 - `writeResponse`: Function to add status or headers to the `response` object (only in backend).
-- `initialRoute`: Initial Route object, only in Vue.
 
 This context can also be accesed from any component by using `useContext` hook:
 
@@ -259,18 +256,14 @@ import routes from './routes'
 
 export default viteSSR(App, {
   routes,
-  transformState(state, defaultTransformer) {
+  transformState(state) {
     if (import.meta.env.SSR) {
-      // Serialize during SSR by using,
-      // for example, using @nuxt/devalue
-      return customSerialize(state)
-
-      // -- Or use the defaultTransformer after modifying the state:
-      // state.apolloCache = state.apolloCache.extract()
-      // return defaultTransformer(state)
+      // Transform during SSR.
+      // state.apolloCache = state.apolloCache.extract();
+      return state;
     } else {
-      // Deserialize in browser
-      return customDeserialize(state)
+      // Transform in browser.
+      return state;
     }
   },
 })
@@ -455,46 +448,10 @@ Example transforming `request` and `response` to types of `express`:
 ```ts
 import { Request, Response } from 'express'
 
-declare module 'vite-ssr/vue' {
+declare module 'vite-ssr-react' {
   export interface Context {
     request: Request
     response: Response
   }
 }
 ```
-
-## Community contributions
-
-Feel free to submit your projects:
-
-### Templates
-
-- Vue 3, Vercel, Axios. [Link](https://github.com/kadiryazici/vite-ssr-vue3-example/).
-
-### Addons
-
-- `vite-ssr-middleware`: Add route middlewares for `vite-ssr` and Vue, similar to Nuxt. [Link](https://github.com/kadiryazici/vite-ssr-middleware).
-
-### Examples
-
-- Imitating Nuxt's `asyncData` in Vue options API. [Link](https://github.com/frandiox/vite-ssr/discussions/46#discussioncomment-988827).
-- Fetch data from Vue components with composition API hook and Axios. [Link](https://github.com/frandiox/vite-ssr/discussions/66#discussion-3467130).
-- Vue + TypeScript with API calls. [Link](https://github.com/thruthesky/vite-ssr/tree/vue-ts/examples/vue-ts).
-- Vue + TypeScript using `serverPrefetch`. [Link](https://github.com/thruthesky/vite-ssr/tree/vue-ts/examples/vue-ts-server-prefetch).
-
-## References
-
-The following projects served as learning material to develop this tool:
-
-- [@tbgse](https://github.com/tbgse)'s [vue3-vite-ssr-example](https://github.com/tbgse/vue3-vite-ssr-example/)
-
-## Todos
-
-- [x] TypeScript
-- [x] Make `src/main.js` file name configurable
-- [x] Support build options as CLI flags (`--ssr entry-file` supported)
-- [x] Support React
-- [x] SSR dev-server
-- [x] Make SSR dev-server similar to Vite's dev-server (options, terminal output)
-- [x] Research if `vite-ssr` CLI logic can be moved to the plugin in Vite 2 to use `vite` command instead.
-- [x] Docs

@@ -1,7 +1,7 @@
-const { defineConfig } = require('vite')
-const react = require('@vitejs/plugin-react')
-const { viteSSRPlugin } = require('vite-ssr/plugin')
-const api = require('../node-server/api')
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { viteSSRPlugin } from 'vite-ssr-react/plugin';
+import api from '../node-server/api';
 
 module.exports = defineConfig({
   plugins: [
