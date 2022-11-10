@@ -8,7 +8,6 @@ export declare function viteSSR (
   hook: (
     params: SharedContext & {
       app: any
-      router: any
       initialRoute: any
     },
   ) => any,

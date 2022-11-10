@@ -2,6 +2,6 @@
   "private": true,
   "dependencies": {
     "express": "^4.17.1",
-    "graphql": "^15.5.0"
+    "graphql": "^16.6.0"
   }
 }
