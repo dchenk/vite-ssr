@@ -1,4 +1,3 @@
-import { build, InlineConfig, ResolvedConfig, mergeConfig } from 'vite'
 import replace from '@rollup/plugin-replace'
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -8,17 +7,26 @@ import {
   INDEX_HTML,
   resolveViteConfig,
   BuildOptions,
-} from '../config'
+} from './config'
 import type {
   RollupOutput,
   RollupWatcher,
   OutputAsset,
   OutputOptions,
 } from 'rollup'
+import { build, InlineConfig, ResolvedConfig, mergeConfig } from 'vite'
 
-export = async (inlineBuildOptions: BuildOptions = {}, _viteConfig?: ResolvedConfig) =>
+const cleanPathStart = (path: string): string =>
+  path.startsWith('/') || path.startsWith('.')
+    ? cleanPathStart(path.substring(1))
+    : path
+
+export const buildViteSSR = async (
+  inlineBuildOptions: BuildOptions = {},
+  _viteConfig?: ResolvedConfig
+) =>
   new Promise(async (resolve) => {
-    const viteConfig = _viteConfig || await resolveViteConfig()
+    const viteConfig = _viteConfig || (await resolveViteConfig())
 
     const distDir =
       viteConfig.build?.outDir ?? path.resolve(process.cwd(), 'dist')
@@ -140,9 +148,13 @@ export = async (inlineBuildOptions: BuildOptions = {}, _viteConfig?: ResolvedCon
       ).flatMap((result) => result.output)
 
       // Get the index.html from the resulting bundle.
+      const inputFilePathClean = cleanPathStart(inputFilePath)
       indexHtmlTemplate = (
         clientOutputs.find(
-          (file) => file.type === 'asset' && file.fileName === INDEX_HTML
+          (file) =>
+            file.type === 'asset' &&
+            (file.fileName === INDEX_HTML ||
+              inputFilePathClean === file.fileName)
         ) as OutputAsset
       )?.source as string
 
@@ -185,13 +197,9 @@ async function generatePackageJson(
       ((viteConfig.build?.ssr || serverBuildOptions.build?.ssr) as string)
   )
 
-  const moduleFormat =
-    (viteConfig.build?.rollupOptions?.output as OutputOptions)?.format ||
-    (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)?.format
-
   const packageJson = {
     main: outputFile ? ssrOutput.base : ssrOutput.name + '.js',
-    type: /^esm?$/i.test(moduleFormat || '') ? 'module' : 'commonjs',
+    type: 'module',
     ssr: {
       // This can be used later to serve static assets
       assets: (

@@ -1,9 +1,15 @@
 import './App.css'
-import React, { useState } from 'react'
+import React, { createElement, Fragment, useEffect, useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import logo from './logo.svg'
-import { ClientOnly } from 'vite-ssr'
 import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client'
+
+export const ClientOnly = ({ children }) => {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true))
+
+  return mounted ? createElement(Fragment, { children }) : null
+}
 
 export default function App({ isClient, url, router, apolloCache }) {
   const baseUrl = isClient ? '' : url.origin

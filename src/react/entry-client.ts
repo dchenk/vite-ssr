@@ -1,83 +1,81 @@
-import React, { ReactElement } from 'react'
-import ReactDOM from 'react-dom'
-import createClientContext from '../core/entry-client.js'
-import { BrowserRouter, useNavigate } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
-import { withoutSuffix } from '../utils/route'
-import { createRouter } from './utils'
-import type { ClientHandler, Context } from './types'
+import { createElement, Suspense } from 'react';
+import ReactDOM from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
+import { BrowserRouter } from 'react-router-dom';
+import { ContextProvider } from '../context';
+import { deserializeState } from '../utils/deserialize-state';
+import { withoutSuffix } from '../utils/route';
+import type { SharedContext, SharedOptions } from '../utils/types';
+import type { ClientHandler } from './types';
 
-import { provideContext } from './components.js'
-export { ClientOnly, useContext } from './components.js'
+const createClientContext = (
+  url: URL,
+  transformState: SharedOptions['transformState'] = deserializeState,
+): SharedContext => {
+  // Deserialize the state included in the DOM.
+  const initialState = transformState(
+    // @ts-ignore
+    window.__INITIAL_STATE__,
+    deserializeState,
+  ) || {};
+
+  return {
+    url,
+    isClient: true,
+    initialState,
+    redirect: () => {
+      console.warn('[SSR] Do not call redirect in browser');
+    },
+    writeResponse: () => {
+      console.warn('[SSR] Do not call writeResponse in browser');
+    },
+  };
+};
 
 export const viteSSR: ClientHandler = async function (
   App,
   {
-    routes,
     base,
     suspenseFallback,
-    PropsProvider,
     pageProps,
     debug = {},
-    styleCollector,
     ...options
   },
-  hook
+  hook,
 ) {
-  const url = new URL(window.location.href)
-  const routeBase = base && withoutSuffix(base({ url }), '/')
+  const url = new URL(window.location.href);
+  const routeBase = base && withoutSuffix(base({ url }), '/');
 
-  const ctx = await createClientContext({
-    ...options,
+  const context = await createClientContext(
     url,
-    spaRedirect: (location) => {
-      const navigate = useNavigate()
-      React.useEffect(() => navigate(location), [navigate])
-    },
-  })
+    options.transformState,
+  );
 
-  const context = ctx as Context
-  context.router = createRouter({
-    routes,
-    base,
-    initialState: context.initialState,
-    pagePropsOptions: pageProps,
-    PropsProvider,
-  })
+  await hook(context);
 
-  if (hook) {
-    await hook(context)
-  }
-
-  let app: ReactElement = React.createElement(
-    HelmetProvider,
-    {},
-    React.createElement(
-      // @ts-ignore
-      BrowserRouter,
-      { basename: routeBase },
-      React.createElement(
-        React.Suspense,
-        { fallback: suspenseFallback || '' },
-        provideContext(React.createElement(App, context), context)
-      )
-    )
-  )
-
-  const styles = styleCollector && (await styleCollector(context))
-  if (styles && styles.provide) {
-    app = styles.provide(app)
-  }
+  const app = createElement(
+    Suspense,
+    { fallback: suspenseFallback || '' },
+    createElement(
+      HelmetProvider,
+      {},
+      createElement(
+        BrowserRouter,
+        { basename: routeBase },
+         createElement(ContextProvider, { value: context }, createElement(App, context))
+      ),
+    ),
+  );
 
   if (debug.mount !== false) {
     // @ts-ignore
-    const el = document.getElementById(__CONTAINER_ID__)
-
-    styles && styles.cleanup && styles.cleanup()
+    const el = document.getElementById(__CONTAINER_ID__);
 
     // @ts-ignore
-    __DEV__ ? ReactDOM.render(app, el) : ReactDOM.hydrate(app, el)
+    __DEV__
+      ? // @ts-ignore
+      ReactDOM.createRoot(el).render(app)
+      : // @ts-ignore
+      ReactDOM.hydrateRoot(el, app);
   }
-}
-
-export default viteSSR
+};

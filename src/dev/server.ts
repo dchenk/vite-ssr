@@ -1,17 +1,11 @@
-import type { ServerResponse } from 'http'
-import { promises as fs } from 'fs'
-import path from 'path'
-import { performance } from 'perf_hooks'
-import connect, { NextHandleFunction } from 'connect'
-import {
-  createServer as createViteServer,
-  InlineConfig,
-  ViteDevServer,
-} from 'vite'
-import chalk from 'chalk'
-import { getEntryPoint, getPluginOptions } from '../config'
-
-import type { WriteResponse } from '../utils/types'
+import type { ServerResponse } from 'http';
+import { promises as fs } from 'fs';
+import path from 'path';
+import connect, { NextHandleFunction } from 'connect';
+import { createServer as createViteServer, InlineConfig, ViteDevServer } from 'vite';
+import chalk from 'chalk';
+import { getEntryPoint, getPluginOptions } from '../config';
+import type { WriteResponse } from '../utils/types';
 
 // This cannot be imported from utils due to ESM <> CJS issues
 const isRedirect = ({ status = 0 } = {}) => status >= 300 && status < 400
@@ -32,7 +26,7 @@ export const createSSRDevHandler = (
   options: SsrOptions = {}
 ) => {
   options = {
-    ...server.config.inlineConfig, // CLI flags
+    // ...server.config.inlineConfig, // CLI flags
     ...options,
   }
 
@@ -154,14 +148,6 @@ export async function createSsrServer(
     server: options.server || { ...options },
   })
 
-  if (options.polyfills !== false) {
-    if (!globalThis.fetch) {
-      const fetch = await import('node-fetch')
-      // @ts-ignore
-      globalThis.fetch = fetch.default || fetch
-    }
-  }
-
   const isMiddlewareMode =
     // @ts-ignore
     options?.middlewareMode || options?.server?.middlewareMode
@@ -188,28 +174,17 @@ export async function createSsrServer(
 export function printServerInfo(server: ViteDevServer) {
   const info = server.config.logger.info
 
-  let ssrReadyMessage = '\n -- SSR mode'
-
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {
     info(
-      chalk.cyan(`\n  vite v${require('vite/package.json').version}`) +
-        chalk.green(` dev server running at:\n`),
+      chalk.cyan(`\n  vite`) +
+        chalk.green(' dev server running at:'),
       { clear: !server.config.logger.hasWarned }
     )
 
     // @ts-ignore
     server.printUrls()
-
-    // @ts-ignore
-    if (globalThis.__ssr_start_time) {
-      ssrReadyMessage += chalk.cyan(
-        ` ready in ${Math.round(
-          // @ts-ignore
-          performance.now() - globalThis.__ssr_start_time
-        )}ms.`
-      )
-    }
   }
-
-  info(ssrReadyMessage + '\n')
 }
+
+export const startServer = (options: Parameters<typeof createSsrServer>[0]) =>
+  createSsrServer(options).then((server) => server.listen())

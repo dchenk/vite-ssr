@@ -1,7 +1,6 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 import { setup, reset } from '../../setup/per-suite'
-import fetch from 'node-fetch'
 
 const FIXTURE = 'react-ts-basic'
 

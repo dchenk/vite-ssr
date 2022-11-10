@@ -6,13 +6,14 @@ import {
   findDependencies,
   renderPreloadLinks,
 } from '../utils/html'
-import type {
-  SsrHandler,
-  SsrRenderer,
-  Context,
-  Options,
-  SSRPageDescriptor,
-} from './types'
+import type { Renderer, SharedContext, SharedOptions } from '../utils/types';
+
+export interface SSRPageDescriptor {
+  headTags?: string
+  htmlAttrs?: string
+  bodyAttrs?: string
+  body?: string
+}
 
 const getEmptyHtmlParts = () => ({
   headTags: '',
@@ -23,9 +24,14 @@ const getEmptyHtmlParts = () => ({
   dependencies: [] as string[],
 })
 
-export const viteSSR: SsrHandler = function viteSSR(options, hook) {
-  const renderer: SsrRenderer = hook || (options as SsrRenderer)
-  const { transformState = serializeState } = options as Options
+export const coreViteSSR = function viteSSR(
+  options: SharedOptions,
+  renderer: (
+    context: SharedContext,
+    utils: { isRedirect: () => boolean; [key: string]: unknown }
+  ) => Promise<SSRPageDescriptor>,
+): Renderer {
+  const { transformState = serializeState } = options as Pick<SharedOptions, 'transformState'>
 
   return async function (
     url,
@@ -43,24 +49,22 @@ export const viteSSR: SsrHandler = function viteSSR(options, hook) {
 
     url = createUrl(url)
 
-    // Server redirect utilities
-    const { deferred, response, writeResponse, redirect, isRedirect } =
-      useSsrResponse()
+    const { deferred, response, writeResponse, redirect, isRedirect } = useSsrResponse();
 
-    const context = {
+    const context: SharedContext = {
       url,
       isClient: false,
       initialState: {},
       redirect,
       writeResponse,
       ...extra,
-    } as Context
+    };
 
     // Wait for either rendering finished or redirection detected
     const payload = await Promise.race([
       renderer(context, { ...extra, isRedirect }), // Resolves when rendering to string is done
       deferred.promise, // Resolves when 'redirect' is called
-    ])
+    ]);
 
     // The 'redirect' utility has been called during rendering: skip everything else
     if (isRedirect()) return response
@@ -94,5 +98,3 @@ export const viteSSR: SsrHandler = function viteSSR(options, hook) {
     }
   }
 }
-
-export default viteSSR

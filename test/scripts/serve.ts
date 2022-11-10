@@ -11,7 +11,7 @@ async function serve(
   const srcDir = path.resolve(root)
 
   // build
-  await execa('yarn', ['build'], { cwd: srcDir })
+  await execa('npm', ['run', 'build'], { cwd: srcDir })
 
   // start prod server
   const app = createServer(srcDir)
@@ -36,7 +36,6 @@ export default serve
 // This is a simple Node server that uses the built project.
 
 function createServer(projectPath: string) {
-  global.fetch = require('node-fetch')
   // This contains a list of static routes (assets)
   const { ssr } = require(path.join(projectPath, 'dist/server/package.json'))
 

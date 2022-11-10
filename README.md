@@ -23,7 +23,7 @@ Start a new SSR project right away with filesystem routes, i18n, icons, markdown
 Create a normal [Vite](https://vitejs.dev/guide/) project for Vue or React.
 
 ```sh
-yarn create vite --template [vue|vue-ts|react|react-ts]
+yarn create vite --template [react|react-ts]
 ```
 
 Then, add `vite-ssr` with your package manager (direct dependency) and your framework router.
@@ -83,10 +83,8 @@ The previous handler accepts the following options as its second argument:
 
 - `routes`: Array of routes, according to each framework's router (see [`vue-router`](https://next.router.vuejs.org/api/#routerecordraw) or [`react-router-config`](https://www.npmjs.com/package/react-router-config#route-configuration-shape)).
 - `base`: Function that returns a string with the router base. Can be useful for i18n routes or when the app is not deployed at the domain root.
-- `routerOptions`: Additional router options like scrollBehavior in [`vue-router`](https://next.router.vuejs.org/guide/advanced/scroll-behavior.html).
 - `transformState`: Modify the state to be serialized or deserialized. See [State serialization](#state-serialization) for more information.
 - `pageProps.passToPage`: Whether each route's `initialState` should be automatically passed to the page components as props.
-- `styleCollector`: Only in React. Mechanism to extract CSS in JS. See [integrations#React-CSS-inJS](#React-CSS-in-JS).
 - `debug.mount`: Pass `false` to prevent mounting the app in the client. You will need to do this manually on your own but it's useful to see differences between SSR and hydration.
 
 </p>
@@ -464,21 +462,6 @@ import { Helmet } from 'react-helmet-async'
 </p>
 </details>
 
-## Rendering only in client/browser
-
-Vite SSR exports `ClientOnly` component that renders its children only in the browser:
-
-```jsx
-import { ClientOnly } from 'vite-ssr'
-
-//...
-;<div>
-  <ClientOnly>
-    <div>...</div>
-  </ClientOnly>
-</div>
-```
-
 ## Development
 
 There are two ways to run the app locally for development:
@@ -494,7 +477,7 @@ If you want to run your own dev server (e.g. Express.js) instead of Vite's defau
 
 ```js
 const express = require('express')
-const { createSsrServer } = require('vite-ssr/dev')
+const { createSsrServer } = require('vite-ssr/dev/server')
 
 async function createServer() {
   const app = express()
@@ -539,25 +522,6 @@ export default {
 
 </p>
 </details>
-
-## Integrations
-
-Common integrations will be added here:
-
-### React CSS in JS
-
-Use the `styleCollector` option to specify an SSR style collector. `vite-ssr` exports 3 common CSS-in-JS integrations: `styled-components`, `material-ui-core-v4` and `emotion`:
-
-```js
-import viteSSR from 'vite-ssr/react'
-import styleCollector from 'vite-ssr/react/style-collectors/emotion'
-
-export default viteSSR(App, { routes, styleCollector })
-```
-
-You can provide your own by looking at the [implementation](./src/react/style-collectors/) of any of the existing collectors.
-
-Note that you still need to install all the required dependencies from these packages (e.g. `@emotion/server`, `@emotion/react` and `@emotion/cache` when using Emotion).
 
 ## Custom Typings
 

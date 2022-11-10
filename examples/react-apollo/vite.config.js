@@ -1,11 +1,11 @@
 const { defineConfig } = require('vite')
 const react = require('@vitejs/plugin-react')
-const viteSSR = require('vite-ssr/plugin')
+const { viteSSRPlugin } = require('vite-ssr/plugin')
 const api = require('../node-server/api')
 
 module.exports = defineConfig({
   plugins: [
-    viteSSR(),
+    viteSSRPlugin(),
     react(),
     {
       // Mock API during development

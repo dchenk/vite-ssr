@@ -1,11 +1,6 @@
 #!/usr/bin/env node
-
-// @ts-ignore
-if (!globalThis.__ssr_start_time) {
-  const { performance } = require('perf_hooks')
-  // @ts-ignore
-  globalThis.__ssr_start_time = performance.now()
-}
+import { buildViteSSR } from './build';
+import { startServer } from './dev/server';
 
 const [, , ...args] = process.argv
 
@@ -23,13 +18,10 @@ for (let i = 0; i < args.length; i++) {
 const [command] = args
 
 if (command === 'build') {
-  // @ts-ignore
-  const build = require('./build')
-
-  ;(async () => {
+  (async () => {
     const { mode, ssr, watch } = options
 
-    await build({
+    await buildViteSSR({
       clientOptions: { mode, build: { watch } },
       serverOptions: { mode, build: { ssr } },
     })
@@ -43,7 +35,7 @@ if (command === 'build') {
   command === undefined ||
   command.startsWith('-')
 ) {
-  require('./dev').startServer(options)
+  void startServer(options)
 } else {
   console.log(`Command "${command}" not supported`)
 }

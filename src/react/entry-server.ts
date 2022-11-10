@@ -1,113 +1,81 @@
-import React, { ReactElement } from 'react'
-import ssrPrepass from 'react-ssr-prepass'
-import { renderToString } from 'react-dom/server.js'
-import { StaticRouter } from 'react-router-dom/server'
-import { HelmetProvider } from 'react-helmet-async'
-import { getFullPath, withoutSuffix } from '../utils/route'
-import { createRouter } from './utils'
-import coreViteSSR from '../core/entry-server.js'
-import type { Context, SsrHandler } from './types'
+import { getMarkupFromTree } from '@apollo/client/react/ssr';
+import { createElement, ReactNode, Suspense } from 'react';
+import ssrPrepass from 'react-ssr-prepass';
+import { renderToString } from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
+import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
+import { ContextProvider } from '../context';
+import { coreViteSSR, SSRPageDescriptor } from '../core/entry-server';
+import { getFullPath, withoutSuffix } from '../utils/route';
+import type { SharedContext } from '../utils/types';
+import type { SsrHandler } from './types';
 
-import { provideContext } from './components.js'
-export { ClientOnly, useContext } from './components.js'
+const render = (component: ReactNode) =>
+  getMarkupFromTree({
+    tree: component,
+    renderFunction: renderToString
+  });
 
-let render: (element: ReactElement) => string | Promise<string> = renderToString
-
-// @ts-ignore
-if (__USE_APOLLO_RENDERER__) {
-  // Apollo does not support Suspense so it needs its own
-  // renderer in order to await for async queries.
-  // @ts-ignore
-  import('@apollo/client/react/ssr')
-    .then(({ renderToStringWithData }) => {
-      render = renderToStringWithData
-    })
-    .catch(() => null)
-}
-
-const viteSSR: SsrHandler = function (
+export const viteSSR: SsrHandler = function (
   App,
   {
-    routes,
     base,
+    suspenseFallback,
     prepassVisitor,
-    PropsProvider,
     pageProps,
-    styleCollector,
     ...options
   },
   hook
 ) {
-  return coreViteSSR(options, async (ctx, { isRedirect, ...extra }) => {
-    const context = ctx as Context
-    context.router = createRouter({
-      routes,
-      base,
-      initialState: (extra.initialState as Record<string, unknown>) || null,
-      pagePropsOptions: pageProps,
-      PropsProvider,
-    })
+  return coreViteSSR(options, async (ctx, { isRedirect, ...extra }): Promise<SSRPageDescriptor> => {
+    const context: SharedContext = {
+      ...ctx,
+    };
 
-    if (hook) {
-      context.initialState = (await hook(context)) || context.initialState
+    await hook(context);
+
+    if (isRedirect()) {
+      return {};
     }
-
-    if (isRedirect()) return {}
 
     const routeBase = base && withoutSuffix(base(context), '/')
     const fullPath = getFullPath(context.url, routeBase)
-    const helmetContext: Record<string, Record<string, string>> = {}
+    const helmetContext: Partial<HelmetData['context']> = {}
 
-    let app: ReactElement = React.createElement(
-      HelmetProvider,
-      { context: helmetContext },
-      React.createElement(
-        // @ts-ignore
-        StaticRouter,
-        { basename: routeBase, location: fullPath },
-        provideContext(React.createElement(App, context), context)
+    const app = createElement(
+      Suspense,
+      { fallback: suspenseFallback || '' },
+      createElement(
+        HelmetProvider,
+        { context: helmetContext },
+        createElement(
+          StaticRouter,
+          { basename: routeBase, location: fullPath },
+          createElement(ContextProvider, { value: context }, createElement(App, context))
+        )
       )
     )
-
-    const styles = styleCollector && (await styleCollector(context))
-    if (styles) {
-      app = styles.collect(app)
-    }
 
     await ssrPrepass(app, prepassVisitor)
     const body = await render(app)
 
     if (isRedirect()) {
-      styles && styles.cleanup && styles.cleanup()
-      return {}
-    }
-
-    const currentRoute = context.router.getCurrentRoute()
-    if (currentRoute) {
-      Object.assign(
-        context.initialState || {},
-        (currentRoute.meta || {}).state || {}
-      )
+      return {};
     }
 
     const {
-      htmlAttributes: htmlAttrs = '',
-      bodyAttributes: bodyAttrs = '',
+      htmlAttributes,
+      bodyAttributes,
       ...tags
-    } = helmetContext.helmet || {}
+    } = helmetContext.helmet || {} as HelmetServerState;
 
-    const styleTags: string = (styles && styles.toString(body)) || ''
-    styles && styles.cleanup && styles.cleanup()
+    const htmlAttrs = (htmlAttributes || '').toString();
+    const bodyAttrs = (bodyAttributes || '').toString();
 
-    const headTags =
-      Object.keys(tags)
-        .map((key) => (tags[key] || '').toString())
-        .join('') +
-      '\n' +
-      styleTags
+    const headTags = Object.values(tags)
+      .map(tag => tag.toString())
+      .join('');
 
     return { body, headTags, htmlAttrs, bodyAttrs }
-  })
+  });
 }
-
-export default viteSSR
