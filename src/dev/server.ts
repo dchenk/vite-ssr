@@ -168,7 +168,7 @@ export async function createSsrServer(
   });
 }
 
-export function printServerInfo(server: ViteDevServer) {
+export function printServerInfo(server: ViteDevServer): void {
   const info = server.config.logger.info;
 
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {

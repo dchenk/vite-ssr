@@ -23,7 +23,6 @@ async function serve(
         // @ts-ignore
         const { port } = server.address();
         const baseUrl = `http://localhost:${port}`;
-        // console.log(`Test server running at ${baseUrl}`)
         return resolve({ server, baseUrl });
       });
     } catch (e) {

@@ -27,15 +27,16 @@ export function viteSSRPlugin(
           },
         };
       },
-      configResolved: (config) => {
-        // @ts-ignore
-        config.optimizeDeps = config.optimizeDeps || {};
-        config.optimizeDeps.include = config.optimizeDeps.include || [];
-        config.optimizeDeps.include.push(
-          `${nameToMatch}/react/entry-client`,
-          `${nameToMatch}/react/entry-server`,
-        );
-      },
+      // This does not appear to affect the build.
+      // configResolved: (config) => {
+      // @ts-ignore
+      // config.optimizeDeps = config.optimizeDeps || {};
+      // config.optimizeDeps.include = config.optimizeDeps.include || [];
+      // config.optimizeDeps.include.push(
+      //   `${nameToMatch}/react/entry-client.js`,
+      //   `${nameToMatch}/react/entry-server.js`,
+      // );
+      // },
       async configureServer(server) {
         if (process.env.__DEV_MODE_SSR) {
           const handler = createSSRDevHandler(server, options);

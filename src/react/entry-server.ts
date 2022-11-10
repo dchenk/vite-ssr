@@ -5,13 +5,14 @@ import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-asyn
 import { StaticRouter } from 'react-router-dom/server';
 import ssrPrepass from 'react-ssr-prepass';
 import { ContextProvider } from '../context';
-import { buildHtmlDocument, renderPreloadLinks } from '../utils/html';
+import { buildHtmlDocument } from '../utils/html';
 import { createUrl, withoutPrefix } from '../utils/route';
 import { serializeState } from '../utils/serialize-state';
 import type { Context, Rendered, Renderer, RendererOptions, WriteResponse } from '../utils/types';
 import { defer } from '../utils/defer';
 import { Options } from '../index';
 
+/* This was used for the preload feature.
 const findDependencies = (
   modules: string[],
   manifest: Record<string, string[]>,
@@ -26,6 +27,7 @@ const findDependencies = (
 
   return [...files];
 };
+ */
 
 const getEmptyHtmlParts = <T>(): Omit<Rendered<T>, 'initialState' | 'html'> => ({
   headTags: '',
@@ -146,21 +148,22 @@ export const viteSSR = <InitialState, EndStateServer>(App: FunctionComponent<Con
 
     // If a manifest is provided and the current framework is able to add
     // modules to the context (e.g. Vue) while rendering, collect the dependencies.
-    if (options.manifest) {
-      // if (payload/manifest/options/.modules) {
-      //   htmlParts.dependencies = findDependencies(context.modules, options.manifest);
-      // }
-
-      if (options.preload && htmlParts.dependencies.length > 0) {
-        htmlParts.headTags += renderPreloadLinks(htmlParts.dependencies);
-      }
-    }
+    // TODO
+    // if (options.manifest) {
+    //   if (payload.modules) {
+    //     htmlParts.dependencies = findDependencies(context.modules, options.manifest);
+    //   }
+    //
+    //   if (options.preload && htmlParts.dependencies.length > 0) {
+    //     htmlParts.headTags += renderPreloadLinks(htmlParts.dependencies);
+    //   }
+    // }
 
     return {
       ...htmlParts,
       ...response,
       ...(renderedResponse || {}),
-      html: buildHtmlDocument(template, htmlParts),
+      html: buildHtmlDocument(options.template || template, htmlParts),
     };
   };
 };

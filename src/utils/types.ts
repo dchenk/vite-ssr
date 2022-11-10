@@ -27,12 +27,14 @@ export type Rendered<InitialState> = WriteResponse & {
 
 export interface RendererOptions {
   url: string;
-  /* Client manifest. Required for preloading. */
+  // Client manifest. Required for preloading.
   manifest?: Record<string, string[]>;
-  /* Add preload link tags for JS and CSS assets */
+  // Option to add preload link tags for JS and CSS assets.
   preload: boolean;
   request: Request;
   response: ServerResponse;
+  // Override index.html template. This is set by the plugin in dev mode.
+  template?: string
 }
 
 export interface Renderer<InitialState> {
