@@ -1,15 +1,13 @@
 // https://github.com/yahoo/serialize-javascript
-const UNSAFE_CHARS_REGEXP = /[<>\u2028\u2029]/g
+const UNSAFE_CHARS_REGEXP = /[<>\u2028\u2029]/g;
 const ESCAPED_CHARS = {
   '<': '\\u003C',
   '>': '\\u003E',
   '\u2028': '\\u2028',
   '\u2029': '\\u2029',
-}
+};
 
-function escapeUnsafeChars(unsafeChar: string) {
-  return ESCAPED_CHARS[unsafeChar as keyof typeof ESCAPED_CHARS]
-}
+const escapeUnsafeChars = (unsafeChar: string) => ESCAPED_CHARS[unsafeChar as keyof typeof ESCAPED_CHARS];
 
 export function serializeState(state: any) {
   try {
@@ -25,13 +23,13 @@ export function serializeState(state: any) {
       // which case we wouldn't know if there is redundant escaping), it's safe to use a regular expression for this.
       .replace(/'/g, String.raw`\'`)
       // 3. Escape unsafe chars.
-      .replace(UNSAFE_CHARS_REGEXP, escapeUnsafeChars)
+      .replace(UNSAFE_CHARS_REGEXP, escapeUnsafeChars);
 
     // Wrap the serialized JSON in quotes so that it's parsed
     // by the browser as a string for better performance.
-    return `'${state}'`
+    return `'${state}'`;
   } catch (error) {
-    console.error('[SSR] On state serialization -', error, state)
-    return '{}'
+    console.error('[SSR] On state serialization -', error, state);
+    return '{}';
   }
 }

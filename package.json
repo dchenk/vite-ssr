@@ -9,14 +9,17 @@
     "test": "NODE_OPTIONS='--experimental-specifier-resolution=node' uvu -r ts-node/register test/specs",
     "test:watch": "watchlist src test -- yarn test",
     "pretest": "mkdir -p node_modules/vite-ssr-react && npm run build:compile -- --outDir node_modules/vite-ssr-react && npm run dev:copy",
+    "lint": "./node_modules/.bin/eslint --fix .",
+    "typecheck": "tsc --noEmit",
     "build": "npm-run-all build:*",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:copy": "cp README.md LICENSE dist/",
-    "build:compile": "cd src && tsc",
-    "typecheck": "tsc --noEmit"
+    "build:compile": "cd src && tsc"
   },
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dchenk/vite-ssr.git"
@@ -51,7 +54,6 @@
   },
   "dependencies": {
     "@rollup/plugin-replace": "^3.0.0",
-    "chalk": "^4.1.2",
     "connect": "^3.7.0",
     "react-router-dom": "^6.3.0"
   },
@@ -62,6 +64,10 @@
     "@types/node": "^16.4.7",
     "@types/react": "^18.0.12",
     "@types/react-dom": "^18.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
+    "eslint-plugin-import": "^2.26.0",
     "execa": "^5.1.1",
     "express": "^4.17.1",
     "fs-extra": "^10.0.0",

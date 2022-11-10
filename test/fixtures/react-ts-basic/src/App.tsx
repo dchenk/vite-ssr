@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
-import { Link, Routes, Route } from 'react-router-dom'
-import { Context } from 'vite-ssr-react/react'
+import React, { useState } from 'react';
+import { Link, Routes, Route } from 'react-router-dom';
+import { Context } from 'vite-ssr-react/react';
 
 export default function ({ router }: Context) {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
   return (
     <>
       <nav>
@@ -26,5 +26,5 @@ export default function ({ router }: Context) {
         ))}
       </Routes>
     </>
-  )
+  );
 }

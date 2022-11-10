@@ -5,7 +5,7 @@ import { createSSRDevHandler, SsrOptions } from './dev/server';
 const pluginName = 'vite-ssr-react';
 
 export function viteSSRPlugin(
-  options: ViteSsrPluginOptions & SsrOptions = {}
+  options: ViteSsrPluginOptions & SsrOptions = {},
 ): Array<Plugin & Record<string, any>> {
   const nameToMatch = options.plugin || pluginName;
 
@@ -26,36 +26,36 @@ export function viteSSRPlugin(
             external: [],
             noExternal: [pluginName],
           },
-        }
+        };
       },
       configResolved: (config) => {
         // @ts-ignore
-        config.optimizeDeps = config.optimizeDeps || {}
-        config.optimizeDeps.include = config.optimizeDeps.include || []
+        config.optimizeDeps = config.optimizeDeps || {};
+        config.optimizeDeps.include = config.optimizeDeps.include || [];
         config.optimizeDeps.include.push(
           `${nameToMatch}/react/entry-client`,
           `${nameToMatch}/react/entry-server`,
-        )
+        );
       },
       async configureServer(server) {
         if (process.env.__DEV_MODE_SSR) {
-          const handler = createSSRDevHandler(server, options)
-          return () => server.middlewares.use(handler)
+          const handler = createSSRDevHandler(server, options);
+          return () => server.middlewares.use(handler);
         }
       },
 
       // Implement auto-entry using virtual modules:
       resolveId(source, importer, options) {
         if (source === nameToMatch) {
-          return `virtual:${nameToMatch}/dist/index.js`
+          return `virtual:${nameToMatch}/dist/index.js`;
         }
       },
       load(id, options) {
         if (id === `virtual:${nameToMatch}/dist/index.js`) {
-          const libPath = `${nameToMatch}/dist/react/entry-${options?.ssr ? 'server' : 'client'}.js`
+          const libPath = `${nameToMatch}/dist/react/entry-${options?.ssr ? 'server' : 'client'}.js`;
           return `export { viteSSR } from '${libPath}';`;
         }
       },
     },
-  ]
+  ];
 }

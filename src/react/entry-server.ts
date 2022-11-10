@@ -13,7 +13,7 @@ import type { SsrHandler } from './types';
 const render = (component: ReactNode) =>
   getMarkupFromTree({
     tree: component,
-    renderFunction: renderToString
+    renderFunction: renderToString,
   });
 
 export const viteSSR: SsrHandler = function (
@@ -25,7 +25,7 @@ export const viteSSR: SsrHandler = function (
     pageProps,
     ...options
   },
-  hook
+  hook,
 ) {
   return coreViteSSR(options, async (ctx, { isRedirect, ...extra }): Promise<SSRPageDescriptor> => {
     const context: SharedContext = {
@@ -38,9 +38,9 @@ export const viteSSR: SsrHandler = function (
       return {};
     }
 
-    const routeBase = base && withoutSuffix(base(context), '/')
-    const fullPath = getFullPath(context.url, routeBase)
-    const helmetContext: Partial<HelmetData['context']> = {}
+    const routeBase = base && withoutSuffix(base(context), '/');
+    const fullPath = getFullPath(context.url, routeBase);
+    const helmetContext: Partial<HelmetData['context']> = {};
 
     const app = createElement(
       Suspense,
@@ -51,13 +51,13 @@ export const viteSSR: SsrHandler = function (
         createElement(
           StaticRouter,
           { basename: routeBase, location: fullPath },
-          createElement(ContextProvider, { value: context }, createElement(App, context))
-        )
-      )
-    )
+          createElement(ContextProvider, { value: context }, createElement(App, context)),
+        ),
+      ),
+    );
 
-    await ssrPrepass(app, prepassVisitor)
-    const body = await render(app)
+    await ssrPrepass(app, prepassVisitor);
+    const body = await render(app);
 
     if (isRedirect()) {
       return {};
@@ -76,6 +76,6 @@ export const viteSSR: SsrHandler = function (
       .map(tag => tag.toString())
       .join('');
 
-    return { body, headTags, htmlAttrs, bodyAttrs }
+    return { body, headTags, htmlAttrs, bodyAttrs };
   });
-}
+};

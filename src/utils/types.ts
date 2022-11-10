@@ -1,5 +1,5 @@
-import type { ServerResponse } from 'http'
-import type { IncomingMessage } from 'connect'
+import type { ServerResponse } from 'http';
+import type { IncomingMessage } from 'connect';
 
 export interface Meta {
   propsGetter?: boolean | string
