@@ -4,62 +4,49 @@
 
 # Vite SSR
 
-Simple yet powerful Server Side Rendering for Vite 2 in Node.js (Vue & React).
+Simple yet powerful Server Side Rendering for React on Vite.
 
-- ⚡ Lightning Fast HMR (powered by Vite, even in SSR mode).
-- 💁‍♂️ Consistent DX experience abstracting most of the SSR complexity.
-- 🔍 Small library, unopinionated about your page routing and API logic.
-- 🔥 Fast and SEO friendly thanks to SSR, with SPA takeover for snappy UX.
-- 🧱 Compatible with Vite's plugin ecosystem such as file-based routing, PWA, etc.
+- Lightning Fast HMR powered by Vite, even in SSR mode.
+- Consistent DX experience abstracting most of the SSR complexity.
+- Small library that is un-opinionated about things like your page routing.
+- Fast and SEO friendly thanks to SSR, with SPA takeover for snappy UX.
+- Compatible with Vite's plugin ecosystem.
 
 Vite SSR can be deployed to any Node.js or browser-like environment, including serverless platforms like Vercel, Netlify, or even Cloudflare Workers. It can also run with more traditional servers like Express.js or Fastify.
 
-> Vite SSR is unopinionated about your API logic so you must bring your own. If you want a more opiniated and fullstack setup with filesystem-based API endpoints and auto-managed edge cache, have a look at [Vitedge](https://github.com/frandiox/vitedge). It wraps Vite SSR and can be deployed to Cloudflare Workers or any Node.js environment.
-
-Start a new SSR project right away with filesystem routes, i18n, icons, markdown and more with [Vitesse (Vue)](https://github.com/frandiox/vitesse-ssr-template) or [Reactesse (React)](https://github.com/frandiox/reactesse-ssr-template). See [live demo](https://vitesse-ssr.vercel.app/).
-
 ## Installation
 
-Create a normal [Vite](https://vitejs.dev/guide/) project for Vue or React.
-
-```sh
-yarn create vite --template [react|react-ts]
-```
+Create a normal [Vite](https://vitejs.dev/guide/) project for React.
 
 Then, add `vite-ssr` with your package manager (direct dependency) and your framework router.
 
 ```sh
-# For Vue
-yarn add vite-ssr vue@3 vue-router@4 @vueuse/head
-
-# For React
-yarn add vite-ssr react@16 react-router-dom@5
+npm i vite-ssr react react-router-dom
 ```
 
 Make sure that `index.html` contains a root element with id `app`: `<div id="app"></div>` (or change the default container id in plugin options: `options.containerId`).
 
 ## Usage
 
-Add Vite SSR plugin to your Vite config file (see [`vite.config.js`](./examples/vue/vite.config.js) for a full example).
+Add Vite SSR plugin to your Vite config file (see [`vite.config.js`](./examples/react-apollo/vite.config.js) for a full example).
 
 ```js
 // vite.config.js
-import vue from '@vitejs/plugin-vue'
-import viteSSR from 'vite-ssr/plugin.js'
-// import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react';
+import viteSSR from 'vite-ssr/plugin.js';
 
 export default {
   plugins: [
     viteSSR(),
-    vue(), // react()
+    react()
   ],
-}
+};
 ```
 
-Then, simply import the main Vite SSR handler in your main entry file as follows. See full examples for [Vue](./examples/vue/src/main.js) and [React](./examples/react/src/main.jsx).
+Then, simply import the main Vite SSR handler in your main entry file as follows. See full example for [React](./examples/react-apollo/src/main.jsx).
 
 ```js
-import App from './App' // Vue or React main app
+import App from './App' // React main app
 import routes from './routes'
 import viteSSR from 'vite-ssr'
 // or from 'vite-ssr/vue' or 'vite-ssr/react', which slightly improves typings
@@ -74,7 +61,7 @@ That's right, in Vite SSR **there's only 1 single entry file** by default 🎉. 
 
 If you need conditional logic that should only run in either client or server, use Vite's `import.meta.env.SSR` boolean variable and the tree-shaking will do the rest.
 
-The third argument is Vite SSR's main hook, which runs only once at the start. It receives the SSR context and can be used to initialize the app or setup anything like state management or other plugins. See an example of [Vue + Pinia here](https://pinia.esm.dev/ssr/#state-hydration). In React, the same SSR Context is passed to the main App function/component as props.
+The third argument is Vite SSR's main hook, which runs only once at the start. It receives the SSR context and can be used to initialize the app or setup anything like state management or other plugins. The same SSR Context is passed to the main App component as a prop.
 
 <details><summary>Available options</summary>
 <p>
@@ -101,8 +88,6 @@ The context passed to the main hook (and to React's root component) contains:
 - `request`: Available during SSR.
 - `redirect`: Isomorphic function to redirect to a different URL.
 - `writeResponse`: Function to add status or headers to the `response` object (only in backend).
-- `router`: Router instance in Vue, and a custom router in React to access the routes and page components.
-- `app`: App instance, only in Vue.
 - `initialRoute`: Initial Route object, only in Vue.
 
 This context can also be accesed from any component by using `useContext` hook:
@@ -199,67 +184,6 @@ export async function useFetchData(endpoint) {
   }
 
   return state
-}
-```
-
-```js
-// Page Component with Async Setup
-export default {
-  async setup() {
-    const state = await useFetchData('my-api-endpoint')
-    return { data }
-  },
-}
-
-// Use Suspense in your app root
-<template>
-  <RouterView v-slot="{ Component }">
-    <Suspense>
-      <component :is="Component" />
-    </Suspense>
-  </RouterView>
-</template>
-```
-
-- Calling your API directly from Vue components using Vue's [`serverPrefetch`](https://ssr.vuejs.org/api/#serverprefetch), and storing the result in the SSR initial state. It's also possible to recreate [`asyncData` à la Nuxt.js](https://github.com/frandiox/vite-ssr/discussions/46#discussioncomment-988827).
-
-```js
-// Main
-export default viteSSR(App, { routes }, ({ app, initialState }) => {
-  // You can pass it to your state management
-  // or use `useContext()` like in the Suspense example
-  const pinia = createPinia()
-
-  // Sync initialState with the store:
-  if (import.meta.env.SSR) {
-    initialState.pinia = pinia.state.value
-  } else {
-    pinia.state.value = initialState.pinia
-  }
-
-  app.use(pinia)
-})
-
-// Page Component with Server Prefetch
-export default {
-  beforeMount() {
-    // In browser
-    this.fetchMyData()
-  },
-  async serverPrefetch() {
-    // During SSR
-    await this.fetchMyData()
-  },
-  methods: {
-    fetchMyData() {
-      const store = useStore()
-      if (!store.myData) {
-        return fetch('my/api/data').then(res => res.json()).then((myData) => {
-          store.myData = myData
-        })
-      }
-    },
-  },
 }
 ```
 
