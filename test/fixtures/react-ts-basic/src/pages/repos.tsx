@@ -1,5 +1,5 @@
-import React from 'react'
-import { useFetchRepos } from '../state'
+import React from 'react';
+import { useFetchRepos } from '../state';
 
 type Repo = {
   id: number
@@ -9,12 +9,12 @@ type Repo = {
 }
 
 export default function () {
-  const [repos = [], setRepos] = useFetchRepos<Repo[]>()
+  const [repos = [], setRepos] = useFetchRepos<Repo[]>();
 
   const removeRepo = (id: number) => {
-    const i = repos.findIndex((item) => item.id === id)
-    setRepos(repos.filter((_, index) => index !== i))
-  }
+    const i = repos.findIndex((item) => item.id === id);
+    setRepos(repos.filter((_, index) => index !== i));
+  };
 
   return (
     <>
@@ -42,5 +42,5 @@ export default function () {
         ))}
       </div>
     </>
-  )
+  );
 }

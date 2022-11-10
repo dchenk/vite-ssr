@@ -1,11 +1,11 @@
-import { createUrl } from '../utils/route'
-import { useSsrResponse } from '../utils/response'
-import { serializeState } from '../utils/serialize-state'
+import { createUrl } from '../utils/route';
+import { useSsrResponse } from '../utils/response';
+import { serializeState } from '../utils/serialize-state';
 import {
   buildHtmlDocument,
   findDependencies,
   renderPreloadLinks,
-} from '../utils/html'
+} from '../utils/html';
 import type { Renderer, SharedContext, SharedOptions } from '../utils/types';
 
 export interface SSRPageDescriptor {
@@ -22,7 +22,7 @@ const getEmptyHtmlParts = () => ({
   body: '',
   initialState: undefined as any,
   dependencies: [] as string[],
-})
+});
 
 export const coreViteSSR = function viteSSR(
   options: SharedOptions,
@@ -31,7 +31,7 @@ export const coreViteSSR = function viteSSR(
     utils: { isRedirect: () => boolean; [key: string]: unknown }
   ) => Promise<SSRPageDescriptor>,
 ): Renderer {
-  const { transformState = serializeState } = options as Pick<SharedOptions, 'transformState'>
+  const { transformState = serializeState } = options as Pick<SharedOptions, 'transformState'>;
 
   return async function (
     url,
@@ -39,15 +39,15 @@ export const coreViteSSR = function viteSSR(
       manifest,
       preload = false,
       skip = false,
-      template = `__VITE_SSR_HTML__`, // This string is transformed at build time
+      template = '__VITE_SSR_HTML__', // This string is transformed at build time
       ...extra
-    } = {}
+    } = {},
   ) {
     if (skip) {
-      return { html: template, ...getEmptyHtmlParts() }
+      return { html: template, ...getEmptyHtmlParts() };
     }
 
-    url = createUrl(url)
+    url = createUrl(url);
 
     const { deferred, response, writeResponse, redirect, isRedirect } = useSsrResponse();
 
@@ -67,7 +67,7 @@ export const coreViteSSR = function viteSSR(
     ]);
 
     // The 'redirect' utility has been called during rendering: skip everything else
-    if (isRedirect()) return response
+    if (isRedirect()) return response;
 
     // Not a redirect: get the HTML parts returned by the renderer and continue
     const htmlParts = {
@@ -77,17 +77,17 @@ export const coreViteSSR = function viteSSR(
       // Serialize the state to include it in the DOM
       initialState: await transformState(
         context.initialState || {},
-        serializeState
+        serializeState,
       ),
-    }
+    };
 
     // If a manifest is provided and the current framework is able to add
     // modules to the context (e.g. Vue) while rendering, collect the dependencies.
     if (manifest) {
-      htmlParts.dependencies = findDependencies(context.modules, manifest)
+      htmlParts.dependencies = findDependencies(context.modules, manifest);
 
       if (preload && htmlParts.dependencies.length > 0) {
-        htmlParts.headTags += renderPreloadLinks(htmlParts.dependencies)
+        htmlParts.headTags += renderPreloadLinks(htmlParts.dependencies);
       }
     }
 
@@ -95,6 +95,6 @@ export const coreViteSSR = function viteSSR(
       html: buildHtmlDocument(template, htmlParts),
       ...htmlParts,
       ...response,
-    }
-  }
-}
+    };
+  };
+};

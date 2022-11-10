@@ -1,7 +1,7 @@
-import '../../setup/globals'
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
-import { buildHtmlDocument } from '../../../src/utils/html'
+import '../../setup/globals';
+import { test } from 'uvu';
+import * as assert from 'uvu/assert';
+import { buildHtmlDocument } from '../../../src/utils/html';
 
 const indexHtml = `
 <!DOCTYPE html>
@@ -12,13 +12,13 @@ const indexHtml = `
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
-`
+`;
 
 function normalizeWhitespaces(string: string) {
   return string
     .trim()
     .replace(/\n\s+/gm, '\n')
-    .replace(/[^\S\r\n]+/gm, ' ')
+    .replace(/[^\S\r\n]+/gm, ' ');
 }
 
 test('Build HTML doc', () => {
@@ -29,7 +29,7 @@ test('Build HTML doc', () => {
     headTags: '<meta charset="UTF-8" />',
     htmlAttrs: 'data-html',
     initialState: `'${JSON.stringify({ something: 'another $1' })}'`,
-  })
+  });
 
   assert.is(
     normalizeWhitespaces(result),
@@ -46,8 +46,8 @@ test('Build HTML doc', () => {
           <script type="module" src="/src/main.js"></script>
         </body>
       </html>
-    `)
-  )
-})
+    `),
+  );
+});
 
-test.run()
+test.run();

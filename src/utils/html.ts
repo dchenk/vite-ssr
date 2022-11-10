@@ -1,38 +1,38 @@
 export function findDependencies(
   modules: string[],
-  manifest: Record<string, string[]>
+  manifest: Record<string, string[]>,
 ) {
-  const files = new Set<string>()
+  const files = new Set<string>();
 
   for (const id of modules || []) {
     for (const file of manifest[id] || []) {
-      files.add(file)
+      files.add(file);
     }
   }
 
-  return [...files]
+  return [...files];
 }
 
 export function renderPreloadLinks(files: string[]) {
-  let link = ''
+  let link = '';
 
   for (const file of files || []) {
     if (file.endsWith('.js')) {
-      link += `<link rel="modulepreload" crossorigin href="${file}">`
+      link += `<link rel="modulepreload" crossorigin href="${file}">`;
     } else if (file.endsWith('.css')) {
-      link += `<link rel="stylesheet" href="${file}">`
+      link += `<link rel="stylesheet" href="${file}">`;
     }
   }
 
-  return link
+  return link;
 }
 
 // @ts-ignore
-const containerId = __CONTAINER_ID__ as string
+const containerId = __CONTAINER_ID__ as string;
 
 const containerRE = new RegExp(
-  `<div id="${containerId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`
-)
+  `<div id="${containerId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`,
+);
 
 type DocParts = {
   htmlAttrs?: string
@@ -44,27 +44,27 @@ type DocParts = {
 
 export function buildHtmlDocument(
   template: string,
-  { htmlAttrs, bodyAttrs, headTags, body, initialState }: DocParts
+  { htmlAttrs, bodyAttrs, headTags, body, initialState }: DocParts,
 ) {
   // @ts-ignore
   if (__DEV__) {
     if (template.indexOf(`id="${containerId}"`) === -1) {
       console.warn(
-        `[SSR] Container with id "${containerId}" was not found in index.html`
-      )
+        `[SSR] Container with id "${containerId}" was not found in index.html`,
+      );
     }
   }
 
   if (htmlAttrs) {
-    template = template.replace('<html', `<html ${htmlAttrs} `)
+    template = template.replace('<html', `<html ${htmlAttrs} `);
   }
 
   if (bodyAttrs) {
-    template = template.replace('<body', `<body ${bodyAttrs} `)
+    template = template.replace('<body', `<body ${bodyAttrs} `);
   }
 
   if (headTags) {
-    template = template.replace('</head>', `\n${headTags}</head>`)
+    template = template.replace('</head>', `\n${headTags}</head>`);
   }
 
   return template.replace(
@@ -75,7 +75,7 @@ export function buildHtmlDocument(
       `<div id="${containerId}" data-server-rendered="true"${d1 || ''}>${
         body || ''
       }</div>\n\n  <script>window.__INITIAL_STATE__=${
-        initialState || "'{}'"
-      }</script>`
-  )
+        initialState || '\'{}\''
+      }</script>`,
+  );
 }

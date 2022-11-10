@@ -62,7 +62,7 @@ export const viteSSR: ClientHandler = async function (
       createElement(
         BrowserRouter,
         { basename: routeBase },
-         createElement(ContextProvider, { value: context }, createElement(App, context))
+        createElement(ContextProvider, { value: context }, createElement(App, context)),
       ),
     ),
   );

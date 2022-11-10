@@ -1,6 +1,6 @@
-import fs from 'fs'
-import path from 'path'
-import { resolveConfig, ResolvedConfig, InlineConfig } from 'vite'
+import fs from 'fs';
+import path from 'path';
+import { resolveConfig, ResolvedConfig, InlineConfig } from 'vite';
 
 export interface BuildOptions {
   /**
@@ -38,42 +38,42 @@ export interface ViteSsrPluginOptions {
   }
 }
 
-export const INDEX_HTML = 'index.html'
+export const INDEX_HTML = 'index.html';
 
 export function getPluginOptions(viteConfig: ResolvedConfig) {
   return ((
     viteConfig.plugins.find((plugin) => plugin.name === 'vite-ssr-react') as any
-  )?.viteSsrOptions || {}) as ViteSsrPluginOptions
+  )?.viteSsrOptions || {}) as ViteSsrPluginOptions;
 }
 
 export async function resolveViteConfig(mode?: string) {
   return resolveConfig(
     {},
     'build',
-    mode || process.env.MODE || process.env.NODE_ENV
-  )
+    mode || process.env.MODE || process.env.NODE_ENV,
+  );
 }
 
 export async function getEntryPoint(
   config?: ResolvedConfig,
-  indexHtml?: string
+  indexHtml?: string,
 ) {
   if (!config) {
-    config = await resolveViteConfig()
+    config = await resolveViteConfig();
   }
 
   if (!indexHtml) {
     indexHtml = await fs.promises.readFile(
       getPluginOptions(config).input || path.resolve(config.root, INDEX_HTML),
-      'utf-8'
-    )
+      'utf-8',
+    );
   }
 
   const matches = indexHtml
     .substr(indexHtml.lastIndexOf('script type="module"'))
-    .match(/src="(.*)">/i)
+    .match(/src="(.*)">/i);
 
-  const entryFile = matches?.[1] || 'src/main'
+  const entryFile = matches?.[1] || 'src/main';
 
-  return path.join(config.root, entryFile)
+  return path.join(config.root, entryFile);
 }

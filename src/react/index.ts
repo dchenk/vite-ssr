@@ -1,2 +1,2 @@
-export * from './entry-client'
-export { viteSSR } from './entry-client'
+export * from './entry-client';
+export { viteSSR } from './entry-client';
