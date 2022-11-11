@@ -1,7 +1,7 @@
 import type { ServerResponse } from 'http';
 import { promises as fs } from 'fs';
 import path from 'path';
-import connect, { NextHandleFunction } from 'connect';
+import type { IncomingMessage, NextHandleFunction } from 'connect';
 import { createServer as createViteServer, InlineConfig, ViteDevServer } from 'vite';
 import { getEntryPoint, getPluginOptions } from '../config';
 import type { WriteResponse } from '../utils/types';
@@ -14,7 +14,7 @@ export interface SsrOptions {
   ssr?: string
   getRenderContext?: (params: {
     url: string
-    request: connect.IncomingMessage
+    request: IncomingMessage
     response: ServerResponse
     resolvedEntryPoint: Record<string, any>
   }) => Promise<WriteResponse>
@@ -82,13 +82,10 @@ export const createSSRDevHandler = (
       resolvedEntryPoint = resolvedEntryPoint.default || resolvedEntryPoint;
       const render = resolvedEntryPoint.render || resolvedEntryPoint;
 
-      const protocol =
-        // @ts-ignore
-        request.protocol ||
-        (request.headers.referer || '').split(':')[0] ||
-        'http';
+      // @ts-ignore
+      const protocol = request.protocol || (request.headers.referer || '').split(':')[0] || 'http';
 
-      const url = protocol + '://' + request.headers.host + request.originalUrl;
+      const url = `${protocol}://${request.headers.host || ''}${request.originalUrl || ''}`;
 
       // This context might contain initialState provided by other plugins
       const context =
@@ -107,7 +104,8 @@ export const createSSRDevHandler = (
         return response.end();
       }
 
-      const result = await render(url, {
+      const result = await render({
+        url,
         request,
         response,
         template,
@@ -170,7 +168,7 @@ export async function createSsrServer(
   });
 }
 
-export function printServerInfo(server: ViteDevServer) {
+export function printServerInfo(server: ViteDevServer): void {
   const info = server.config.logger.info;
 
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {

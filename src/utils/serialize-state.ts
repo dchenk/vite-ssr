@@ -9,13 +9,13 @@ const ESCAPED_CHARS = {
 
 const escapeUnsafeChars = (unsafeChar: string) => ESCAPED_CHARS[unsafeChar as keyof typeof ESCAPED_CHARS];
 
-export function serializeState(state: any) {
+export const serializeState = (state: unknown): string => {
   try {
     // -- Example:
     // Input object: { hello: 'w\'or"ld  -  <script>' }
     // Output string: '{"hello":"w\'or\\"ld  -  \u003Cscript\u003E"}'
 
-    state = JSON.stringify(state || {})
+    const stateStr = JSON.stringify(state || {})
       // 1. Duplicate the escape char (\) for already escaped characters (e.g. \n or \").
       .replace(/\\/g, String.raw`\\`)
       // 2. Escape existing single quotes to allow wrapping the whole thing in '...'.
@@ -27,9 +27,9 @@ export function serializeState(state: any) {
 
     // Wrap the serialized JSON in quotes so that it's parsed
     // by the browser as a string for better performance.
-    return `'${state}'`;
+    return `'${stateStr}'`;
   } catch (error) {
     console.error('[SSR] On state serialization -', error, state);
     return '{}';
   }
-}
+};

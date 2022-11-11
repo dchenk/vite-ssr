@@ -11,7 +11,8 @@ export const ClientOnly = ({ children }) => {
   return mounted ? createElement(Fragment, { children }) : null
 }
 
-export default function App({ isClient, url, router, apolloCache }) {
+export default function App({ url, router, apolloCache }) {
+  const isClient = !import.meta.env.SSR;
   const baseUrl = isClient ? '' : url.origin
   const [count, setCount] = useState(0)
 
