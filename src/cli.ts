@@ -10,8 +10,7 @@ for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   const nextArg = args[i + 1];
   if (arg.startsWith('--')) {
-    options[arg.replace('--', '')] =
-      !nextArg || nextArg.startsWith('--') ? true : nextArg;
+    options[arg.replace('--', '')] = !nextArg || nextArg.startsWith('--') ? true : nextArg;
   }
 }
 
@@ -30,11 +29,7 @@ if (command === 'build') {
       process.exit();
     }
   })();
-} else if (
-  command === 'dev' ||
-  command === undefined ||
-  command.startsWith('-')
-) {
+} else if (command === 'dev' || command === undefined || command.startsWith('-')) {
   void startServer(options);
 } else {
   console.log(`Command "${command}" not supported`);

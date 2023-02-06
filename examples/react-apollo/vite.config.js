@@ -10,8 +10,8 @@ module.exports = defineConfig({
     {
       // Mock API during development
       configureServer({ middlewares }) {
-        api.forEach(({ route, handler }) => middlewares.use(route, handler))
+        api.forEach(({ route, handler }) => middlewares.use(route, handler));
       },
     },
   ],
-})
+});

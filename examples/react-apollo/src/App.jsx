@@ -1,20 +1,20 @@
-import './App.css'
-import React, { createElement, Fragment, useEffect, useState } from 'react'
-import { Link, Route, Routes } from 'react-router-dom'
-import logo from './logo.svg'
-import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client'
+import './App.css';
+import React, { createElement, Fragment, useEffect, useState } from 'react';
+import { Link, Route, Routes } from 'react-router-dom';
+import logo from './logo.svg';
+import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client';
 
 export const ClientOnly = ({ children }) => {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true))
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true));
 
-  return mounted ? createElement(Fragment, { children }) : null
-}
+  return mounted ? createElement(Fragment, { children }) : null;
+};
 
 export default function App({ url, router, apolloCache }) {
   const isClient = !import.meta.env.SSR;
-  const baseUrl = isClient ? '' : url.origin
-  const [count, setCount] = useState(0)
+  const baseUrl = isClient ? '' : url.origin;
+  const [count, setCount] = useState(0);
 
   const client = new ApolloClient({
     link: createHttpLink({
@@ -24,7 +24,7 @@ export default function App({ url, router, apolloCache }) {
     ssrMode: !isClient,
     cache: apolloCache,
     credentials: 'same-origin',
-  })
+  });
 
   return (
     <ApolloProvider client={client}>
@@ -33,9 +33,7 @@ export default function App({ url, router, apolloCache }) {
           <img src={logo} className="App-logo" alt="logo" />
           <p>Hello ViteSSR + React + Apollo!</p>
           <p>
-            <button onClick={() => setCount((count) => count + 1)}>
-              count is: {count}
-            </button>
+            <button onClick={() => setCount((count) => count + 1)}>count is: {count}</button>
           </p>
 
           <nav>
@@ -45,18 +43,14 @@ export default function App({ url, router, apolloCache }) {
                   <li key={path}>
                     <Link to={path}>{name}</Link>
                   </li>
-                )
+                );
               })}
             </ul>
           </nav>
         </header>
         <Routes>
           {router.routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={<route.component />}
-            />
+            <Route key={route.path} path={route.path} element={<route.component />} />
           ))}
         </Routes>
 
@@ -65,5 +59,5 @@ export default function App({ url, router, apolloCache }) {
         </ClientOnly>
       </div>
     </ApolloProvider>
-  )
+  );
 }

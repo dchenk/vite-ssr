@@ -36,25 +36,22 @@ import react from '@vitejs/plugin-react';
 import viteSSR from 'vite-ssr-react/plugin.js';
 
 export default {
-  plugins: [
-    viteSSR(),
-    react()
-  ],
+  plugins: [viteSSR(), react()],
 };
 ```
 
 Then, simply import the main Vite SSR handler in your main entry file as follows. See full example for [React](./examples/react-apollo/src/main.jsx).
 
 ```js
-import App from './App' // React main app
-import routes from './routes'
-import viteSSR from 'vite-ssr'
+import App from './App'; // React main app
+import routes from './routes';
+import viteSSR from 'vite-ssr';
 // or from 'vite-ssr/vue' or 'vite-ssr/react', which slightly improves typings
 
 export default viteSSR(App, { routes }, (context) => {
   /* Vite SSR main hook for custom logic */
   /* const { app, router, initialState, ... } = context */
-})
+});
 ```
 
 That's right, in Vite SSR **there's only 1 single entry file** by default 🎉. It will take care of providing your code with the right environment.
@@ -125,14 +122,14 @@ Vite SSR initial state consists of a plain JS object that is passed to your appl
 export default viteSSR(App, { routes }, ({ initialState }) => {
   if (import.meta.env.SSR) {
     // Write in server
-    initialState.myData = 'DB/API data'
+    initialState.myData = 'DB/API data';
   } else {
     // Read in browser
-    console.log(initialState.myData) // => 'DB/API data'
+    console.log(initialState.myData); // => 'DB/API data'
   }
 
   // Provide the initial state to your stores, components, etc. as you prefer.
-})
+});
 ```
 
 If you prefer having a solution for data fetching out of the box, have a look at [Vitedge](https://github.com/frandiox/vitedge). Otherwise, you can implement it as follows:
@@ -148,39 +145,39 @@ Vue has multiple ways to provide the initial state to Vite SSR:
 export default viteSSR(App, { routes }, async ({ app }) => {
   router.beforEach(async (to, from) => {
     if (to.meta.state) {
-      return // Already has state
+      return; // Already has state
     }
 
-    const response = await fetch('my/api/data/' + to.name)
+    const response = await fetch('my/api/data/' + to.name);
 
     // This will modify initialState
-    to.meta.state = await response.json()
-  })
-})
+    to.meta.state = await response.json();
+  });
+});
 ```
 
 - Calling your API directly from Vue components using [`Suspense`](https://v3.vuejs.org/guide/migration/suspense.html), and storing the result in the SSR initial state. See a full example with `Suspense` [here](./examples/vue/src/pages/Homepage.vue). If you prefer Axios, there's also an example [here](https://github.com/frandiox/vite-ssr/discussions/66).
 
 ```js
-import { useContext } from 'vite-ssr'
-import { useRoute } from 'vue-router'
-import { inject, ref } from 'vue'
+import { useContext } from 'vite-ssr';
+import { useRoute } from 'vue-router';
+import { inject, ref } from 'vue';
 
 // This is a custom hook to fetch data in components
 export async function useFetchData(endpoint) {
-  const { initialState } = useContext()
-  const { name } = useRoute() // this is just a unique key
-  const state = ref(initialState[name] || null)
+  const { initialState } = useContext();
+  const { name } = useRoute(); // this is just a unique key
+  const state = ref(initialState[name] || null);
 
   if (!state.value) {
-    state.value = await (await fetch(endpoint)).json()
+    state.value = await (await fetch(endpoint)).json();
 
     if (import.meta.env.SSR) {
-      initialState[name] = state.value
+      initialState[name] = state.value;
     }
   }
 
-  return state
+  return state;
 }
 ```
 
@@ -198,15 +195,15 @@ There are a few ways to provide initial state in React:
 function App({ initialState }) {
   if (!initialState.ready) {
     const promise = getPageProps(route).then((state) => {
-      Object.assign(initialState, state)
-      initialState.ready = true
-    })
+      Object.assign(initialState, state);
+      initialState.ready = true;
+    });
 
     // Throw the promise so Suspense can await it
-    throw promise
+    throw promise;
   }
 
-  return <div>{initialState}</div>
+  return <div>{initialState}</div>;
 }
 ```
 
@@ -250,9 +247,9 @@ function App({ router }) {
 Vite SSR simply uses `JSON.stringify` to serialize the state, escapes certain characters to prevent XSS and saves it in the DOM. This behavior can be overriden by using the `transformState` hook in case you need to support dates, regexp or function serialization:
 
 ```js
-import viteSSR from 'vite-ssr'
-import App from './app'
-import routes from './routes'
+import viteSSR from 'vite-ssr';
+import App from './app';
+import routes from './routes';
 
 export default viteSSR(App, {
   routes,
@@ -266,7 +263,7 @@ export default viteSSR(App, {
       return state;
     }
   },
-})
+});
 ```
 
 ## Accessing `response` and `request` objects
@@ -274,19 +271,15 @@ export default viteSSR(App, {
 In development, both `response` and `request` objects are passed to the main hook during SSR:
 
 ```js
-export default viteSSR(
-  App,
-  { routes },
-  ({ initialState, request, response }) => {
-    // Access request cookies, etc.
-  }
-)
+export default viteSSR(App, { routes }, ({ initialState, request, response }) => {
+  // Access request cookies, etc.
+});
 ```
 
 In production, you control the server so you must pass these objects to the rendering function in order to have them available in the main hook:
 
 ```js
-import render from './dist/server'
+import render from './dist/server';
 
 //...
 
@@ -297,7 +290,7 @@ const { html } = await render(url, {
   response,
   // Anything here will be available in the main hook.
   initialState: { hello: 'world' }, // Optional prefilled state
-})
+});
 ```
 
 Beware that, in development, Vite uses plain Node.js + Connect for middleware. Therefore, the `request` and `response` objects might differ from your production environment if you use any server framework such as Fastify, Express.js or Polka. If you want to use your own server during development, check [Middleware Mode](#middleware-mode).
@@ -340,14 +333,14 @@ Use your framework's utilities to handle head tags and attributes for html and b
 Install [`@vueuse/head`](https://github.com/vueuse/head) as follows:
 
 ```js
-import { createHead } from '@vueuse/head'
+import { createHead } from '@vueuse/head';
 
 export default viteSSR(App, { routes }, ({ app }) => {
-  const head = createHead()
-  app.use(head)
+  const head = createHead();
+  app.use(head);
 
-  return { head }
-})
+  return { head };
+});
 
 // In your components:
 // import { useHead } from '@vueuse/head'
@@ -363,17 +356,17 @@ export default viteSSR(App, { routes }, ({ app }) => {
 Use [`react-helmet-async`](https://github.com/staylor/react-helmet-async) from your components (similar usage to `react-helmet`). The provider is already added by Vite SSR.
 
 ```jsx
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet-async';
 
 // ...
-;<>
+<>
   <Helmet>
     <html lang="en" />
     <meta charSet="utf-8" />
     <title>Home</title>
     <link rel="canonical" href="http://mysite.com/example" />
   </Helmet>
-</>
+</>;
 ```
 
 </p>
@@ -393,24 +386,24 @@ SPA mode will be slightly faster but the SSR one will have closer behavior to a 
 If you want to run your own dev server (e.g. Express.js) instead of Vite's default Node + Connect, you can use Vite SSR in middleware mode:
 
 ```js
-const express = require('express')
-const { createSsrServer } = require('vite-ssr/dev/server')
+const express = require('express');
+const { createSsrServer } = require('vite-ssr/dev/server');
 
 async function createServer() {
-  const app = express()
+  const app = express();
 
   // Create vite-ssr server in middleware mode.
   const viteServer = await createSsrServer({
     server: { middlewareMode: 'ssr' },
-  })
+  });
 
   // Use vite's connect instance as middleware
-  app.use(viteServer.middlewares)
+  app.use(viteServer.middlewares);
 
-  app.listen(3000)
+  app.listen(3000);
 }
 
-createServer()
+createServer();
 ```
 
 ## Production
@@ -446,12 +439,12 @@ You can define your own typings with `vite-ssr`. To declare custom types, the fi
 Example transforming `request` and `response` to types of `express`:
 
 ```ts
-import { Request, Response } from 'express'
+import { Request, Response } from 'express';
 
 declare module 'vite-ssr-react' {
   export interface Context {
-    request: Request
-    response: Response
+    request: Request;
+    response: Response;
   }
 }
 ```

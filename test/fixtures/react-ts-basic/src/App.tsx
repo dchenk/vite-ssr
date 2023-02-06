@@ -18,11 +18,7 @@ export default function ({ router }: Context) {
 
       <Routes>
         {router.routes.map((route) => (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={<route.component route={route} />}
-          />
+          <Route key={route.path} path={route.path} element={<route.component route={route} />} />
         ))}
       </Routes>
     </>

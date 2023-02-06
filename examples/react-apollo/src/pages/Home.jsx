@@ -1,6 +1,6 @@
-import React from 'react'
-import { Helmet } from 'react-helmet-async'
-import { gql, useQuery } from '@apollo/client'
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
+import { gql, useQuery } from '@apollo/client';
 
 const GET_HELLO = gql`
   query Hello($msg: String!) {
@@ -8,19 +8,19 @@ const GET_HELLO = gql`
       answer
     }
   }
-`
+`;
 
 export default function Home(props) {
   const getGraphHello = () => {
     const { loading, data } = useQuery(GET_HELLO, {
       variables: { msg: 'This is HOME page' },
-    })
+    });
 
     if (loading) {
-      return <p>Loading ...</p>
+      return <p>Loading ...</p>;
     }
-    return <h3>{(data && data.hello && data.hello.answer) || ''}</h3>
-  }
+    return <h3>{(data && data.hello && data.hello.answer) || ''}</h3>;
+  };
 
   return (
     <>
@@ -35,5 +35,5 @@ export default function Home(props) {
 
       <div>{getGraphHello()}</div>
     </>
-  )
+  );
 }

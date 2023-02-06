@@ -14,19 +14,17 @@ export function renderPreloadLinks(files: string[]): string {
 
 const containerId = 'app';
 
-const containerRE = new RegExp(
-  `<div id="${containerId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`,
-);
+const containerRE = new RegExp(`<div id="${containerId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`);
 
 export type PageDescriptor = {
-  headTags?: string
-  htmlAttrs?: string
-  bodyAttrs?: string
-  body?: string
+  headTags?: string;
+  htmlAttrs?: string;
+  bodyAttrs?: string;
+  body?: string;
 };
 
 export type DocParts = PageDescriptor & {
-  initialState?: string
+  initialState?: string;
 };
 
 export function buildHtmlDocument(
@@ -36,9 +34,7 @@ export function buildHtmlDocument(
   // @ts-expect-error -- __DEV__ is injected by Vite.
   if (__DEV__) {
     if (!template.includes(`id="${containerId}"`)) {
-      console.warn(
-        `[SSR] Container with id "${containerId}" was not found in index.html`,
-      );
+      console.warn(`[SSR] Container with id "${containerId}" was not found in index.html`);
     }
   }
 
@@ -61,8 +57,6 @@ export function buildHtmlDocument(
     (_, d1) =>
       `<div id="${containerId}" data-server-rendered="true"${d1 || ''}>${
         body || ''
-      }</div>\n\n  <script>window.__INITIAL_STATE__=${
-        initialState || '\'{}\''
-      }</script>`,
+      }</div>\n\n  <script>window.__INITIAL_STATE__=${initialState || "'{}'"}</script>`,
   );
 }

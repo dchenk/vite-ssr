@@ -20,7 +20,6 @@ export function useSsrResponse() {
     response,
     writeResponse,
     isRedirect: () => isRedirect(response),
-    redirect: (location: string, status = 302) =>
-      writeResponse({ headers: { location }, status }),
+    redirect: (location: string, status = 302) => writeResponse({ headers: { location }, status }),
   };
 }

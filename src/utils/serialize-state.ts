@@ -7,7 +7,8 @@ const ESCAPED_CHARS = {
   '\u2029': '\\u2029',
 };
 
-const escapeUnsafeChars = (unsafeChar: string) => ESCAPED_CHARS[unsafeChar as keyof typeof ESCAPED_CHARS];
+const escapeUnsafeChars = (unsafeChar: string) =>
+  ESCAPED_CHARS[unsafeChar as keyof typeof ESCAPED_CHARS];
 
 export const serializeState = (state: unknown): string => {
   try {

@@ -52,7 +52,9 @@ export function viteSSRPlugin(
       },
       load(id, options) {
         if (id === `virtual:${nameToMatch}/dist/index.js`) {
-          const libPath = `${nameToMatch}/dist/react/entry-${options?.ssr ? 'server' : 'client'}.js`;
+          const libPath = `${nameToMatch}/dist/react/entry-${
+            options?.ssr ? 'server' : 'client'
+          }.js`;
           return `export { viteSSR } from '${libPath}';`;
         }
       },
