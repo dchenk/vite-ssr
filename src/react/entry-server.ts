@@ -5,12 +5,12 @@ import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-asyn
 import { StaticRouter } from 'react-router-dom/server';
 import ssrPrepass from 'react-ssr-prepass';
 import { ContextProvider } from '../context';
+import { Options } from '../index';
+import { defer } from '../utils/defer';
 import { buildHtmlDocument } from '../utils/html';
 import { createUrl, withoutPrefix } from '../utils/route';
 import { serializeState } from '../utils/serialize-state';
 import type { Context, Rendered, Renderer, RendererOptions, WriteResponse } from '../utils/types';
-import { defer } from '../utils/defer';
-import { Options } from '../index';
 
 /* This was used for the preload feature.
 const findDependencies = (
@@ -40,12 +40,15 @@ const getEmptyHtmlParts = <T>(): Omit<Rendered<T>, 'initialState' | 'html'> => (
 const isRedirectStatus = (status: number | undefined = 0) =>
   !!status && status >= 300 && status < 400;
 
-export const viteSSR = <InitialState, EndStateServer>(App: FunctionComponent<Context<InitialState>>, {
-  suspenseFallback,
-  prepassVisitor,
-  setupStateSSR,
-  transformStateSSR,
-}: Options<InitialState, EndStateServer>): Renderer<InitialState> => {
+export const viteSSR = <InitialState, EndStateServer>(
+  App: FunctionComponent<Context<InitialState>>,
+  {
+    suspenseFallback,
+    prepassVisitor,
+    setupStateSSR,
+    transformStateSSR,
+  }: Options<InitialState, EndStateServer>,
+): Renderer<InitialState> => {
   const renderer = async (
     options: RendererOptions,
     writeResponse: (params: WriteResponse) => void,
@@ -73,11 +76,7 @@ export const viteSSR = <InitialState, EndStateServer>(App: FunctionComponent<Con
         createElement(
           StaticRouter,
           { location: routerLocation },
-          createElement(
-            ContextProvider,
-            { value: context as never },
-            createElement(App, context),
-          ),
+          createElement(ContextProvider, { value: context as never }, createElement(App, context)),
         ),
       ),
     );
@@ -89,20 +88,23 @@ export const viteSSR = <InitialState, EndStateServer>(App: FunctionComponent<Con
       renderFunction: renderToString,
     });
 
-    const {
-      htmlAttributes,
-      bodyAttributes,
-      ...tags
-    } = helmetContext.helmet || {} as HelmetServerState;
+    const { htmlAttributes, bodyAttributes, ...tags } =
+      helmetContext.helmet || ({} as HelmetServerState);
 
     const htmlAttrs = (htmlAttributes || '').toString();
     const bodyAttrs = (bodyAttributes || '').toString();
 
     const headTags = Object.values(tags)
-      .map(tag => tag.toString())
+      .map((tag) => tag.toString())
       .join('');
 
-    return { body, headTags, htmlAttrs, bodyAttrs, initialState: context.initialState };
+    return {
+      body,
+      headTags,
+      htmlAttrs,
+      bodyAttrs,
+      initialState: context.initialState,
+    };
   };
 
   // This string is transformed at build time. It must be a template string to allow newlines within it.
@@ -135,9 +137,10 @@ export const viteSSR = <InitialState, EndStateServer>(App: FunctionComponent<Con
     }
 
     // The transformStateSSR hook is able to ultimately decide what the response will be.
-    const [serverEndState, renderedResponse] = payload && 'initialState' in payload
-      ? transformStateSSR(payload.initialState)
-      : [{}, payload];
+    const [serverEndState, renderedResponse] =
+      payload && 'initialState' in payload
+        ? transformStateSSR(payload.initialState)
+        : [{}, payload];
 
     const htmlParts = {
       ...getEmptyHtmlParts<InitialState>(),

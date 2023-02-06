@@ -6,7 +6,7 @@ export interface BuildOptions {
   /**
    * Vite options applied only to the client build
    */
-  clientOptions?: InlineConfig
+  clientOptions?: InlineConfig;
   /**
    * Vite options applied only to the server build
    */
@@ -15,53 +15,42 @@ export interface BuildOptions {
      * Extra properties to include in the generated server package.json,
      * or 'false' to avoid generating it.
      */
-    packageJson?: Record<string, unknown> | false
-  }
+    packageJson?: Record<string, unknown> | false;
+  };
 }
 
 export interface ViteSsrPluginOptions {
   /**
    * Path to the entry index.html file.
    */
-  input: string
+  input: string;
   build?: BuildOptions & {
     /**
      * Keep the index.html generated in the client build
      * @default false
      */
-    keepIndexHtml?: boolean
-  }
+    keepIndexHtml?: boolean;
+  };
 }
 
 export const INDEX_HTML = 'index.html';
 
 export function getPluginOptions(viteConfig: ResolvedConfig) {
-  return ((
-    viteConfig.plugins.find((plugin) => plugin.name === 'vite-ssr-react') as any
-  )?.viteSsrOptions || {}) as ViteSsrPluginOptions;
+  return ((viteConfig.plugins.find((plugin) => plugin.name === 'vite-ssr-react') as any)
+    ?.viteSsrOptions || {}) as ViteSsrPluginOptions;
 }
 
 export function resolveViteConfig(mode?: string): Promise<ResolvedConfig> {
-  return resolveConfig(
-    {},
-    'build',
-    mode || process.env.MODE || process.env.NODE_ENV,
-  );
+  return resolveConfig({}, 'build', mode || process.env.MODE || process.env.NODE_ENV);
 }
 
-export async function getEntryPoint(
-  config?: ResolvedConfig,
-  indexHtml?: string,
-) {
+export async function getEntryPoint(config?: ResolvedConfig, indexHtml?: string) {
   if (!config) {
     config = await resolveViteConfig();
   }
 
   if (!indexHtml) {
-    indexHtml = await fs.promises.readFile(
-      getPluginOptions(config).input,
-      'utf-8',
-    );
+    indexHtml = await fs.promises.readFile(getPluginOptions(config).input, 'utf-8');
   }
 
   const matches = indexHtml

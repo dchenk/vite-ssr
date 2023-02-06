@@ -12,11 +12,10 @@
     "eslint:recommended",
     "plugin:import/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "prettier"
   ],
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "ignorePatterns": [
     "build/**",
     "scripts/*.js",
@@ -27,42 +26,7 @@
     "vite.config.ts"
   ],
   "rules": {
-    "indent": "off",
-    "@typescript-eslint/indent": [
-      "error",
-      2,
-      {
-        "SwitchCase": 0
-      }
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "jsx-quotes": [
-      "error",
-      "prefer-double"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ],
-    "comma-dangle": [
-      "error",
-      "always-multiline"
-    ],
-    "max-len": [
-      "warn",
-      {
-        "code": 120,
-        "tabWidth": 2,
-        "ignoreComments": false
-      }
-    ],
+    "linebreak-style": ["error", "unix"],
     "no-multi-spaces": "warn",
     "no-multiple-empty-lines": [
       "warn",
@@ -70,14 +34,19 @@
         "max": 1
       }
     ],
-    "import/no-unresolved": "off",
-    "import/named": "off",
-    "import/order": "error",
-    "no-else-return": "warn",
-    "eol-last": [
-      "warn",
-      "always"
+    "import/order": [
+      "error",
+      {
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "newlines-between": "never"
+      }
     ],
+    "import/newline-after-import": ["error", { "considerComments": true }],
+    "no-else-return": "warn",
+    "eol-last": ["warn", "always"],
     "@typescript-eslint/array-type": [
       "error",
       {
@@ -95,9 +64,11 @@
       }
     ],
     "@typescript-eslint/switch-exhaustiveness-check": "error",
-    "@typescript-eslint/object-curly-spacing": [
-      "error",
-      "always"
-    ]
+    "@typescript-eslint/object-curly-spacing": ["error", "always"]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": true
+    }
   }
 }

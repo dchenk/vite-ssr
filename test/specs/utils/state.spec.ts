@@ -4,7 +4,7 @@ import { serializeState } from '../../../src/utils/serialize-state';
 
 test('serializeState', () => {
   // Simple case.
-  assert.is(serializeState({}), '\'{}\'');
+  assert.is(serializeState({}), "'{}'");
 
   // Expect JSON double quotes not to be needlessly escaped.
   assert.is(serializeState({ hello: 'world' }), '\'{"hello":"world"}\'');
@@ -16,7 +16,7 @@ test('serializeState', () => {
   );
 
   // Expect single quotes to be escaped.
-  assert.is(serializeState({ quote: '\'' }), '\'{"quote":"\\\'"}\'');
+  assert.is(serializeState({ quote: "'" }), '\'{"quote":"\\\'"}\'');
 
   // Expect escape characters to be escaped.
   // In our object, the "esc" property is a string with one character: a backslash.
@@ -36,10 +36,7 @@ test('serializeState', () => {
   );
 
   // Expect angle brackets to be escaped.
-  assert.is(
-    serializeState({ brackets: '< >' }),
-    '\'{"brackets":"\\u003C \\u003E"}\'',
-  );
+  assert.is(serializeState({ brackets: '< >' }), '\'{"brackets":"\\u003C \\u003E"}\'');
 });
 
 test.run();

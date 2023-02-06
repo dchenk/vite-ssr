@@ -1,5 +1,5 @@
-import type { ServerResponse } from 'http';
 import { promises as fs } from 'fs';
+import type { ServerResponse } from 'http';
 import path from 'path';
 import type { IncomingMessage, NextHandleFunction } from 'connect';
 import { createServer as createViteServer, InlineConfig, ViteDevServer } from 'vite';
@@ -10,20 +10,17 @@ import type { WriteResponse } from '../utils/types';
 const isRedirect = ({ status = 0 } = {}) => status >= 300 && status < 400;
 
 export interface SsrOptions {
-  plugin?: string
-  ssr?: string
+  plugin?: string;
+  ssr?: string;
   getRenderContext?: (params: {
-    url: string
-    request: IncomingMessage
-    response: ServerResponse
-    resolvedEntryPoint: Record<string, any>
-  }) => Promise<WriteResponse>
+    url: string;
+    request: IncomingMessage;
+    response: ServerResponse;
+    resolvedEntryPoint: Record<string, any>;
+  }) => Promise<WriteResponse>;
 }
 
-export const createSSRDevHandler = (
-  server: ViteDevServer,
-  options: SsrOptions = {},
-) => {
+export const createSSRDevHandler = (server: ViteDevServer, options: SsrOptions = {}) => {
   options = {
     // ...server.config.inlineConfig, // CLI flags
     ...options,
@@ -33,10 +30,7 @@ export const createSSRDevHandler = (
   const resolve = (p: string) => path.resolve(server.config.root, p);
   async function getIndexTemplate(url: string) {
     // Template should be fresh in every request
-    const indexHtml = await fs.readFile(
-      pluginOptions.input || resolve('index.html'),
-      'utf-8',
-    );
+    const indexHtml = await fs.readFile(pluginOptions.input || resolve('index.html'), 'utf-8');
     return await server.transformIndexHtml(url, indexHtml);
   }
 
@@ -56,11 +50,7 @@ export const createSSRDevHandler = (
     }
   }
 
-  const handleSsrRequest: NextHandleFunction = async (
-    request,
-    response,
-    next,
-  ) => {
+  const handleSsrRequest: NextHandleFunction = async (request, response, next) => {
     if (request.method !== 'GET' || request.originalUrl === '/favicon.ico') {
       return next();
     }
@@ -75,8 +65,7 @@ export const createSSRDevHandler = (
     }
 
     try {
-      const entryPoint =
-        options.ssr || (await getEntryPoint(server.config, template));
+      const entryPoint = options.ssr || (await getEntryPoint(server.config, template));
 
       let resolvedEntryPoint = await server.ssrLoadModule(resolve(entryPoint));
       resolvedEntryPoint = resolvedEntryPoint.default || resolvedEntryPoint;
@@ -134,9 +123,7 @@ export const createSSRDevHandler = (
   return handleSsrRequest;
 };
 
-export async function createSsrServer(
-  options: InlineConfig & { polyfills?: boolean } = {},
-) {
+export async function createSsrServer(options: InlineConfig & { polyfills?: boolean } = {}) {
   // Enable SSR in the plugin
   process.env.__DEV_MODE_SSR = 'true';
 
@@ -172,10 +159,9 @@ export function printServerInfo(server: ViteDevServer): void {
   const info = server.config.logger.info;
 
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {
-    info(
-      '\n  vite dev server running at:',
-      { clear: !server.config.logger.hasWarned },
-    );
+    info('\n  vite dev server running at:', {
+      clear: !server.config.logger.hasWarned,
+    });
 
     server.printUrls();
   }

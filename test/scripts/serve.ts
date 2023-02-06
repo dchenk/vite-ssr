@@ -1,15 +1,13 @@
-import path from 'path';
 import http from 'http';
 import type { AddressInfo } from 'net';
+import path from 'path';
 import execa from 'execa';
 import express from 'express';
 
 /**
  * Given an app path, build it and serve it in production mode with Express.
  */
-async function serve(
-  root: string,
-): Promise<{ baseUrl: string; server: http.Server } | undefined> {
+async function serve(root: string): Promise<{ baseUrl: string; server: http.Server } | undefined> {
   const srcDir = path.resolve(root);
 
   // build
@@ -40,10 +38,7 @@ async function createServer(projectPath: string) {
   const { ssr } = await import(path.join(projectPath, 'dist/server/package.json'));
 
   // The manifest is required for preloading assets
-  const manifest = await import(path.join(
-    projectPath,
-    'dist/client/ssr-manifest.json',
-  ));
+  const manifest = await import(path.join(projectPath, 'dist/client/ssr-manifest.json'));
 
   // This is the server renderer we just built
   const { default: renderPage } = await import(path.join(projectPath, 'dist/server'));
@@ -52,10 +47,7 @@ async function createServer(projectPath: string) {
 
   // Serve every static asset route
   for (const asset of ssr.assets || []) {
-    server.use(
-      `/${asset}`,
-      express.static(path.join(`${projectPath}/dist/client/${asset}`)),
-    );
+    server.use(`/${asset}`, express.static(path.join(`${projectPath}/dist/client/${asset}`)));
   }
 
   // Everything else is treated as a "rendering request"

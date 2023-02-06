@@ -3,15 +3,14 @@ import ReactDOM from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
 import { ContextProvider } from '../context';
+import { Options } from '../index';
 import { deserializeState } from '../utils/deserialize-state';
 import type { Context } from '../utils/types';
-import { Options } from '../index';
 
-export const viteSSR = <InitialState>(App: FunctionComponent<Context<InitialState>>, {
-  debug = {},
-  suspenseFallback,
-  transformStateClient,
-}: Options<InitialState, never>): void => {
+export const viteSSR = <InitialState>(
+  App: FunctionComponent<Context<InitialState>>,
+  { debug = {}, suspenseFallback, transformStateClient }: Options<InitialState, never>,
+): void => {
   const initialStateStr = (window as unknown as { __INITIAL_STATE__: string }).__INITIAL_STATE__;
 
   const context: Context<InitialState> = {
@@ -27,11 +26,7 @@ export const viteSSR = <InitialState>(App: FunctionComponent<Context<InitialStat
       createElement(
         BrowserRouter,
         {},
-        createElement(
-          ContextProvider,
-          { value: context as never },
-          createElement(App, context),
-        ),
+        createElement(ContextProvider, { value: context as never }, createElement(App, context)),
       ),
     ),
   );
@@ -40,8 +35,6 @@ export const viteSSR = <InitialState>(App: FunctionComponent<Context<InitialStat
     const el = document.getElementById('app') as HTMLElement;
 
     // @ts-expect-error
-    __DEV__
-      ? ReactDOM.createRoot(el).render(app)
-      : ReactDOM.hydrateRoot(el, app);
+    __DEV__ ? ReactDOM.createRoot(el).render(app) : ReactDOM.hydrateRoot(el, app);
   }
 };

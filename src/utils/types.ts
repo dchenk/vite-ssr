@@ -10,20 +10,20 @@ export interface Context<InitialState> {
 }
 
 export interface WriteResponse {
-  status?: number
-  statusText?: string
-  headers?: Record<string, string>
+  status?: number;
+  statusText?: string;
+  headers?: Record<string, string>;
 }
 
 export type Rendered<InitialState> = WriteResponse & {
   initialState: InitialState;
-  html: string
-  htmlAttrs: string
-  headTags: string
-  body: string
-  bodyAttrs: string
-  dependencies: string[]
-}
+  html: string;
+  htmlAttrs: string;
+  headTags: string;
+  body: string;
+  bodyAttrs: string;
+  dependencies: string[];
+};
 
 export interface RendererOptions {
   url: string;
@@ -34,7 +34,7 @@ export interface RendererOptions {
   request: Request;
   response: ServerResponse;
   // Override index.html template. This is set by the plugin in dev mode.
-  template?: string
+  template?: string;
 }
 
 export interface Renderer<InitialState> {
@@ -42,5 +42,5 @@ export interface Renderer<InitialState> {
     options: RendererOptions,
     // writeResponse: (params: WriteResponse) => void,
     // isRedirect: () => boolean,
-  ): Promise<Rendered<InitialState> | WriteResponse>
+  ): Promise<Rendered<InitialState> | WriteResponse>;
 }

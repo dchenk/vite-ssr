@@ -3,12 +3,16 @@ import path from 'path';
 import replace from '@rollup/plugin-replace';
 import type { OutputAsset, OutputChunk, OutputOptions, RollupOutput, RollupWatcher } from 'rollup';
 import { build, InlineConfig, mergeConfig, ResolvedConfig } from 'vite';
-import { BuildOptions, getEntryPoint, getPluginOptions, INDEX_HTML, resolveViteConfig } from './config';
+import {
+  BuildOptions,
+  getEntryPoint,
+  getPluginOptions,
+  INDEX_HTML,
+  resolveViteConfig,
+} from './config';
 
 const cleanPathStart = (path: string): string =>
-  path.startsWith('/') || path.startsWith('.')
-    ? cleanPathStart(path.substring(1))
-    : path;
+  path.startsWith('/') || path.startsWith('.') ? cleanPathStart(path.substring(1)) : path;
 
 export const buildViteSSR = async (
   inlineBuildOptions: BuildOptions = {},
@@ -17,8 +21,7 @@ export const buildViteSSR = async (
   new Promise(async (resolve) => {
     const viteConfig = _viteConfig || (await resolveViteConfig());
 
-    const distDir =
-      viteConfig.build?.outDir ?? path.resolve(process.cwd(), 'dist');
+    const distDir = viteConfig.build?.outDir ?? path.resolve(process.cwd(), 'dist');
 
     const { input: inputFilePath = '', build: pluginBuildOptions = {} } =
       getPluginOptions(viteConfig);
@@ -39,26 +42,23 @@ export const buildViteSSR = async (
           rollupOptions:
             inputFilePath && inputFilePath !== defaultFilePath
               ? {
-                input: inputFilePath,
-                plugins: [
-                  inputFileName !== INDEX_HTML && {
-                    generateBundle(options, bundle) {
-                      // Rename custom name to index.html
-                      const htmlAsset = bundle[inputFileName];
-                      delete bundle[inputFileName];
-                      htmlAsset.fileName = INDEX_HTML;
-                      bundle[INDEX_HTML] = htmlAsset;
+                  input: inputFilePath,
+                  plugins: [
+                    inputFileName !== INDEX_HTML && {
+                      generateBundle(options, bundle) {
+                        // Rename custom name to index.html
+                        const htmlAsset = bundle[inputFileName];
+                        delete bundle[inputFileName];
+                        htmlAsset.fileName = INDEX_HTML;
+                        bundle[INDEX_HTML] = htmlAsset;
+                      },
                     },
-                  },
-                ],
-              }
+                  ],
+                }
               : {},
         },
       } as InlineConfig,
-      mergeConfig(
-        pluginBuildOptions.clientOptions || {},
-        inlineBuildOptions.clientOptions || {},
-      ),
+      mergeConfig(pluginBuildOptions.clientOptions || {}, inlineBuildOptions.clientOptions || {}),
     ) as NonNullable<BuildOptions['clientOptions']>;
 
     const serverBuildOptions = mergeConfig(
@@ -82,18 +82,12 @@ export const buildViteSSR = async (
           },
         },
       } as InlineConfig,
-      mergeConfig(
-        pluginBuildOptions.serverOptions || {},
-        inlineBuildOptions.serverOptions || {},
-      ),
+      mergeConfig(pluginBuildOptions.serverOptions || {}, inlineBuildOptions.serverOptions || {}),
     ) as NonNullable<BuildOptions['serverOptions']>;
 
     const clientResult = await build(clientBuildOptions);
 
-    const isWatching = Object.prototype.hasOwnProperty.call(
-      clientResult,
-      '_maxListeners',
-    );
+    const isWatching = Object.prototype.hasOwnProperty.call(clientResult, '_maxListeners');
 
     if (isWatching) {
       // This is a build watcher
@@ -114,11 +108,7 @@ export const buildViteSSR = async (
 
           // Build SSR bundle with the new index.html
           await build(serverBuildOptions);
-          await generatePackageJson(
-            viteConfig,
-            clientBuildOptions,
-            serverBuildOptions,
-          );
+          await generatePackageJson(viteConfig, clientBuildOptions, serverBuildOptions);
 
           if (!resolved) {
             resolve(null);
@@ -129,11 +119,10 @@ export const buildViteSSR = async (
     } else {
       // This is a normal one-off build
       const clientOutputs = (
-        Array.isArray(clientResult)
-          ? clientResult
-          : [clientResult as RollupOutput]
+        Array.isArray(clientResult) ? clientResult : [clientResult as RollupOutput]
       ).flatMap(
-        (result): Array<OutputChunk | OutputAsset> => result.output as Array<OutputChunk | OutputAsset>,
+        (result): Array<OutputChunk | OutputAsset> =>
+          result.output as Array<OutputChunk | OutputAsset>,
       );
 
       // Get the index.html from the resulting bundle.
@@ -142,8 +131,7 @@ export const buildViteSSR = async (
         clientOutputs.find(
           (file) =>
             file.type === 'asset' &&
-            (file.fileName === INDEX_HTML ||
-              inputFilePathClean === file.fileName),
+            (file.fileName === INDEX_HTML || inputFilePathClean === file.fileName),
         ) as OutputAsset
       )?.source as string;
 
@@ -154,17 +142,11 @@ export const buildViteSSR = async (
       // Let's remove it unless the user overrides this behavior.
       if (!pluginBuildOptions.keepIndexHtml) {
         await fs
-          .unlink(
-            path.join(clientBuildOptions.build?.outDir as string, 'index.html'),
-          )
+          .unlink(path.join(clientBuildOptions.build?.outDir as string, 'index.html'))
           .catch(() => null);
       }
 
-      await generatePackageJson(
-        viteConfig,
-        clientBuildOptions,
-        serverBuildOptions,
-      );
+      await generatePackageJson(viteConfig, clientBuildOptions, serverBuildOptions);
 
       resolve(null);
     }
@@ -177,13 +159,10 @@ async function generatePackageJson(
 ) {
   if (serverBuildOptions.packageJson === false) return;
 
-  const outputFile = (
-    serverBuildOptions.build?.rollupOptions?.output as OutputOptions
-  )?.file;
+  const outputFile = (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)?.file;
 
   const ssrOutput = path.parse(
-    outputFile ||
-      ((viteConfig.build?.ssr || serverBuildOptions.build?.ssr) as string),
+    outputFile || ((viteConfig.build?.ssr || serverBuildOptions.build?.ssr) as string),
   );
 
   const packageJson = {
@@ -191,9 +170,9 @@ async function generatePackageJson(
     type: 'module',
     ssr: {
       // This can be used later to serve static assets
-      assets: (
-        await fs.readdir(clientBuildOptions.build?.outDir as string)
-      ).filter((file) => !/(index\.html|manifest\.json)$/i.test(file)),
+      assets: (await fs.readdir(clientBuildOptions.build?.outDir as string)).filter(
+        (file) => !/(index\.html|manifest\.json)$/i.test(file),
+      ),
     },
     ...(serverBuildOptions.packageJson || {}),
   };

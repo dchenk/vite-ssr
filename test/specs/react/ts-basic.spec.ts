@@ -42,10 +42,7 @@ test(`${FIXTURE}/repos`, async (context) => {
   // SPA take over
   const selector = 'div[data-test="desc-vue-router"]';
 
-  assert.match(
-    await context.page.textContent(selector),
-    'official router for Vue',
-  );
+  assert.match(await context.page.textContent(selector), 'official router for Vue');
 
   await context.page.click('button[data-test="remove-vue-router"]');
 

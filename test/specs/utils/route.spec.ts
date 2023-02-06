@@ -38,10 +38,7 @@ test('withoutSuffix', () => {
 });
 
 test('createUrl', () => {
-  assert.is(
-    createUrl(new URL('http://e.g/my/path')).toString(),
-    'http://e.g/my/path',
-  );
+  assert.is(createUrl(new URL('http://e.g/my/path')).toString(), 'http://e.g/my/path');
 
   assert.is(createUrl('http://e.g/my/path').toString(), 'http://e.g/my/path');
   assert.is(createUrl('/my/path').toString(), 'http://e.g/my/path');

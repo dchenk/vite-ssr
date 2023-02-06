@@ -6,7 +6,7 @@ export type { Context, WriteResponse } from './utils/types';
 
 type PrepassVisitor = (
   element: ElementType<any>,
-  instance?: Component<any, any>
+  instance?: Component<any, any>,
 ) => void | Promise<any>;
 
 export type Options<InitialState, EndStateServer> = {
@@ -20,7 +20,7 @@ export type Options<InitialState, EndStateServer> = {
   prepassVisitor?: PrepassVisitor;
 };
 
-export declare function viteSSR<InitialState, EndStateServer = InitialState> (
+export declare function viteSSR<InitialState, EndStateServer = InitialState>(
   App: FunctionComponent<Context<InitialState>>,
   options: Options<InitialState, EndStateServer>,
 ): Renderer<InitialState> | void;
