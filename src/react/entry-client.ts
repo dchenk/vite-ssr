@@ -34,7 +34,6 @@ export const viteSSR = <InitialState>(
   if (debug.mount !== false) {
     const el = document.getElementById('app') as HTMLElement;
 
-    // @ts-expect-error
-    __DEV__ ? ReactDOM.createRoot(el).render(app) : ReactDOM.hydrateRoot(el, app);
+    ReactDOM.createRoot(el).render(app);
   }
 };
