@@ -1,6 +1,6 @@
 {
   "name": "vite-ssr-react",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "description": "Vite utility for server-side rendering React apps",
   "scripts": {
     "dev": "npm-run-all dev:* --parallel dev:watch:* ",
