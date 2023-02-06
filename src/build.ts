@@ -1,20 +1,9 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import replace from '@rollup/plugin-replace';
-import type {
-  RollupOutput,
-  RollupWatcher,
-  OutputAsset,
-  OutputOptions,
-} from 'rollup';
-import { build, InlineConfig, ResolvedConfig, mergeConfig } from 'vite';
-import {
-  getEntryPoint,
-  getPluginOptions,
-  INDEX_HTML,
-  resolveViteConfig,
-  BuildOptions,
-} from './config';
+import type { OutputAsset, OutputChunk, OutputOptions, RollupOutput, RollupWatcher } from 'rollup';
+import { build, InlineConfig, mergeConfig, ResolvedConfig } from 'vite';
+import { BuildOptions, getEntryPoint, getPluginOptions, INDEX_HTML, resolveViteConfig } from './config';
 
 const cleanPathStart = (path: string): string =>
   path.startsWith('/') || path.startsWith('.')
@@ -108,15 +97,13 @@ export const buildViteSSR = async (
 
     if (isWatching) {
       // This is a build watcher
-      const watcher = clientResult as RollupWatcher;
+      const watcher = clientResult as unknown as RollupWatcher;
       let resolved = false;
 
-      // @ts-ignore
-      watcher.on('event', async ({ result }) => {
-        if (result) {
-          // This piece runs everytime there is
-          // an updated frontend bundle.
-          result.close();
+      watcher.on('event', async (event) => {
+        if (event.code === 'BUNDLE_END' && event.result) {
+          // This piece runs everytime there is an updated frontend bundle.
+          await event.result.close();
 
           // Re-read the index.html in case it changed.
           // This content is not included in the virtual bundle.
@@ -145,7 +132,9 @@ export const buildViteSSR = async (
         Array.isArray(clientResult)
           ? clientResult
           : [clientResult as RollupOutput]
-      ).flatMap((result) => result.output);
+      ).flatMap(
+        (result): Array<OutputChunk | OutputAsset> => result.output as Array<OutputChunk | OutputAsset>,
+      );
 
       // Get the index.html from the resulting bundle.
       const inputFilePathClean = cleanPathStart(inputFilePath);

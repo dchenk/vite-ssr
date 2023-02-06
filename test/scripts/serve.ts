@@ -1,5 +1,6 @@
 import path from 'path';
 import http from 'http';
+import type { AddressInfo } from 'net';
 import execa from 'execa';
 import express from 'express';
 
@@ -20,8 +21,7 @@ async function serve(
   return new Promise((resolve, reject) => {
     try {
       const server = app.listen(0, () => {
-        // @ts-ignore
-        const { port } = server.address();
+        const { port } = server.address() as AddressInfo;
         const baseUrl = `http://localhost:${port}`;
         return resolve({ server, baseUrl });
       });
@@ -53,15 +53,14 @@ async function createServer(projectPath: string) {
   // Serve every static asset route
   for (const asset of ssr.assets || []) {
     server.use(
-      '/' + asset,
-      express.static(path.join(`${projectPath}/dist/client/` + asset)),
+      `/${asset}`,
+      express.static(path.join(`${projectPath}/dist/client/${asset}`)),
     );
   }
 
   // Everything else is treated as a "rendering request"
   server.get('*', async (request, response) => {
-    const url =
-      request.protocol + '://' + request.get('host') + request.originalUrl;
+    const url = `${request.protocol}://${request.get('host')}${request.originalUrl}`;
 
     const { html, status, statusText, headers } = await renderPage(url, {
       manifest,
